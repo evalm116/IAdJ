@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Arrive : SteeringBehaviour
+public class Arrivev2 : SteeringBehaviour
 {
     [Tooltip("Mostrar gizmos de depuración")]
     [SerializeField] protected bool _showDebugGizmos = true;
@@ -12,6 +12,7 @@ public class Arrive : SteeringBehaviour
     public float timeToTarget = 0.1f;
     public float slowRadius = 5f;
 
+    public Agent target;
 
 
     void Start()
@@ -49,7 +50,7 @@ public class Arrive : SteeringBehaviour
         return targetVelocity;
     }
 
-    public override Steering GetSteering(Agent agent)
+    public override Steering GetSteering(AgentNPC agent)
     {
         Steering steer = new Steering();
 

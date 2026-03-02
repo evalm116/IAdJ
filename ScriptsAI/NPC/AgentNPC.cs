@@ -81,4 +81,11 @@ public class AgentNPC : Agent
         // El resultado final se guarda para ser aplicado en el siguiente frame.
         this.steer = kinematicFinal;
     }
+
+    public void StopMoving()
+    {
+        Velocity = Vector3.zero;
+        Speed = 0f;
+        Rotation = 0f;
+    }
 }
