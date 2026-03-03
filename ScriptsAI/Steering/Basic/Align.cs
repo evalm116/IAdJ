@@ -4,11 +4,8 @@ using UnityEngine;
 
 public class Align : SteeringBehaviour
 {
-    public Agent target;
 
     // Configuración (valores recomendados basados en tus imágenes)
-    public float slowRadius = 45f;   // Ángulo (grados) para empezar a frenar
-    public float targetRadius = 1f;  // Ángulo (grados) para considerar que ha llegado
     public float timeToTarget = 0.1f;// Tiempo para alcanzar la velocidad deseada
 
     void Start()
@@ -29,23 +26,23 @@ public class Align : SteeringBehaviour
         // Slide Imagen 1: rotation = mapToRange(rotation)
         while (rotation > 180) rotation -= 360;
         while (rotation < -180) rotation += 360;
-        
+
         float rotationSize = Mathf.Abs(rotation);
 
         // --- PASO 3: Comprobar si hemos llegado (Check if we are there) ---
         // Slide Imagen 1: if rotationSize < targetRadius return None
-        if (rotationSize < targetRadius)
+        if (rotationSize < agent.InteriorRadius)
         {
             // Opcional: Matar la velocidad residual para que no vibre
-            agent.Rotation = 0; 
+            agent.Rotation = 0;
             return steer; // Devuelve steering con todo a 0
         }
 
         // --- PASO 4: Calcular velocidad deseada (Target Rotation Speed) ---
         float targetRotationSpeed;
-        
+
         // Slide Imagen 2: if rotationSize > slowRadius -> maxRotation
-        if (rotationSize > slowRadius)
+        if (rotationSize > agent.ArrivalRadius)
         {
             targetRotationSpeed = agent.MaxRotation;
         }
@@ -53,7 +50,7 @@ public class Align : SteeringBehaviour
         {
             // Slide Imagen 2: else -> maxRotation * rotationSize / slowRadius
             // (Regla de tres para frenar poco a poco)
-            targetRotationSpeed = agent.MaxRotation * (rotationSize / slowRadius);
+            targetRotationSpeed = agent.MaxRotation * (rotationSize / agent.ArrivalRadius);
         }
 
         // --- PASO 5: Restaurar el signo ---
@@ -64,13 +61,13 @@ public class Align : SteeringBehaviour
         // Slide Imagen 2: steering.angular = targetRotation - character.rotation
         // (Aquí character.rotation es tu velocidad angular actual)
         steer.angular = targetRotationSpeed - agent.Rotation;
-        
+
         // Slide Imagen 2: steering.angular /= timeToTarget
         steer.angular /= timeToTarget;
 
         // --- PASO 7: Limitar Aceleración (Clamp) ---
         float angularAcceleration = Mathf.Abs(steer.angular);
-        
+
         // Slide Imagen 2: if angularAcceleration > maxAngularAcceleration...
         if (angularAcceleration > agent.MaxAngularAcc)
         {

@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class AntiAlign : SteeringBehaviour
 {
-    public Agent target; // El objetivo al que queremos mirar
 
     // Configuración para frenar el giro suavemente
     public float slowAngle = 20f;   // Empieza a frenar cuando falten 20 grados
@@ -13,7 +12,7 @@ public class AntiAlign : SteeringBehaviour
 
     void Start()
     {
-        this.nameSteering = "Align";
+        this.nameSteering = "Anti-Align";
     }
 
     public override Steering GetSteering(AgentNPC agent)
@@ -26,7 +25,7 @@ public class AntiAlign : SteeringBehaviour
 
         // 2. Mapeamos el ángulo a (-180, 180) para girar por el lado más corto
         // Usamos la función MapToRange que ya tienes en Bodi.cs
-        rotation = Bodi.MapToRange(rotation, Range.NegPiToPi); 
+        rotation = Bodi.MapToRange(rotation, Range.NegPiToPi);
         // Nota: Si en Bodi usas radianes, usa NegPiToPi. Si usas grados, usa una versión de (-180, 180).
         // Si tu Bodi trabaja en grados (que parece que sí), mejor hacemos esto manual para asegurar:
         while (rotation > 180) rotation -= 360;

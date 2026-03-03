@@ -5,8 +5,7 @@ using UnityEngine;
 public class VelocityMatching : SteeringBehaviour
 {
     // Variable para el objetivo (target)
-    public Agent target;
-    
+
     // Variable timeToTarget = 0.1 (como en la imagen)
     public float timeToTarget = 0.1f;
 
@@ -19,7 +18,7 @@ public class VelocityMatching : SteeringBehaviour
     {
         // # Create the structure to hold our output
         Steering steer = new Steering();
-        
+
         if (target == null) return steer;
 
         // --- PASO 1: Calcular Aceleración ---

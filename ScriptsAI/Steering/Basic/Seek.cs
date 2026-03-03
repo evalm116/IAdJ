@@ -5,9 +5,6 @@ using UnityEngine;
 public class Seek : SteeringBehaviour
 {
 
-    public Agent target;
-
-    
     void Start()
     {
         this.nameSteering = "Seek";

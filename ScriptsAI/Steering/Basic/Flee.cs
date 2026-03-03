@@ -3,7 +3,6 @@
 public class Flee : SteeringBehaviour
 {
     // Variable pública para asignar el objetivo del que huir
-    public Agent target;
 
     void Start()
     {
@@ -15,7 +14,7 @@ public class Flee : SteeringBehaviour
     {
         Steering steer = new Steering();
 
-        if(target == null) return steer;
+        if (target == null) return steer;
 
         // Huir: Vector DESDE el objetivo HACIA mí
         Vector3 direction = agent.Position - target.Position;

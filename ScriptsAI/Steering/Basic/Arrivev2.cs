@@ -12,7 +12,6 @@ public class Arrivev2 : SteeringBehaviour
     public float timeToTarget = 0.1f;
     public float slowRadius = 5f;
 
-    public Agent target;
 
 
     void Start()
