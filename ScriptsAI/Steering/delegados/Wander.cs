@@ -4,32 +4,28 @@ using UnityEngine;
 
 public class Wander : Face
 {
-    public float wanderRadius = 5f;
-    public float wanderOffset = 5f;
-    public float wanderRate = 1f;
-    public float wanderOrientation = 0f;
+    public float wanderRadius = 3f;
+    public float wanderOffset = 4f;
+    // Ahora wanderRate es "cuántos metros se mueve el punto por segundo"
+    public float wanderRate = 10f; 
     public float maxAcceleration = 5f;
 
     private Agent wanderTarget;
+    
+    // GUARDAMOS LA POSICIÓN LOCAL DEL PUNTO EN EL CÍRCULO
+    private Vector3 targetLocalPosition;
 
     void Start()
     {
-        // Configuramos el nombre para el debug
         this.nameSteering = "Wander";
 
-        // 1. CREAMOS EL FANTASMA (DUMMY)
-        // Como tu Face modifica el target, necesitamos que el target sea este fantasma
-        // para no fastidiar a nadie más.
         GameObject tempObj = new GameObject("Dummy_Wander");
         tempObj.transform.parent = this.transform; 
         wanderTarget = tempObj.AddComponent<Agent>();
         
-        // Configuración inicial segura del fantasma
-        wanderTarget.Position = transform.position;
-        wanderTarget.Orientation = 0;
-        
-        // Le damos un ángulo aleatorio inicial
-        wanderOrientation = Random.Range(0f, 360f);
+        // Inicializamos el punto en un lugar aleatorio del borde del círculo
+        Vector2 rand = Random.insideUnitCircle.normalized * wanderRadius;
+        targetLocalPosition = new Vector3(rand.x, 0, rand.y);
     }
 
     void OnDestroy()
@@ -39,36 +35,30 @@ public class Wander : Face
 
     public override Steering GetSteering(AgentNPC character)
     {
-        // 1. CALCULAMOS EL DESPLAZAMIENTO ALEATORIO (Jitter)
-        float randomJitter = Random.Range(-1f, 1f) * wanderRate * Time.deltaTime;
-        wanderOrientation += randomJitter;
+        // 1. MOVER EL PUNTO ALEATORIAMENTE (Jitter)
+        // Le sumamos un vector aleatorio 3D pequeño cada frame
+        targetLocalPosition += new Vector3(
+            Random.Range(-1f, 1f), 
+            0, 
+            Random.Range(-1f, 1f)
+        ) * wanderRate * Time.deltaTime;
 
-        // 2. CALCULAMOS EL CENTRO DEL CÍRCULO
-        // El círculo está 'wanderOffset' metros delante del personaje
-        Vector3 circleCenter = character.Position + (character.transform.forward * wanderOffset);
+        // 2. DEVOLVERLO AL BORDE DEL CÍRCULO
+        // Al normalizarlo y multiplicar por el radio, lo obligamos a no salirse de la línea verde
+        targetLocalPosition = targetLocalPosition.normalized * wanderRadius;
 
-        // 3. CALCULAMOS LA POSICIÓN EN EL BORDE DEL CÍRCULO
-        // Convertimos el ángulo a coordenadas (X, Z)
-        // Sumamos la orientación del personaje para que el círculo gire con él
-        float targetAngle = character.Orientation + wanderOrientation;
-        
-        Vector3 direction = new Vector3(Mathf.Sin(targetAngle * Mathf.Deg2Rad), 0, Mathf.Cos(targetAngle * Mathf.Deg2Rad));
-        
-        // 4. MOVEMOS NUESTRO FANTASMA A ESA POSICIÓN
-        wanderTarget.Position = circleCenter + (direction * wanderRadius);
+        // 3. EMPUJARLO HACIA ADELANTE (El palo de la zanahoria)
+        Vector3 localTargetWithOffset = targetLocalPosition + new Vector3(0, 0, wanderOffset);
 
-        // Tu script Face calculará la rotación necesaria para mirar a este fantasma
-        // y se la aplicará a la orientación del fantasma (lo cual nos da igual) 
-        // y luego llamará a Align.
+        // 4. CONVERTIR AL MUNDO REAL Y DELEGAR EN FACE
+        wanderTarget.Position = character.transform.TransformPoint(localTargetWithOffset);
         this.target = wanderTarget;
-
-        // 6. LLAMAMOS A FACE 
+        
         Steering steer = base.GetSteering(character);
 
-        this.target = wanderTarget;
-        
-        // 7. AÑADIMOS MOVIMIENTO HACIA ADELANTE
-        steer.linear = character.transform.forward * character.MaxAcceleration;
+        // 5. ACELERAR HACIA EL PUNTO
+        Vector3 directionToTarget = (wanderTarget.Position - character.Position).normalized;
+        steer.linear = directionToTarget * character.MaxAcceleration;
 
         return steer;
     }
@@ -82,6 +72,7 @@ public class Wander : Face
             {
                 Vector3 circleCenter = agent.Position + (agent.transform.forward * wanderOffset);
                 Gizmos.color = Color.green;
+                // Dibujamos el círculo en el que vive el punto
                 Gizmos.DrawWireSphere(circleCenter, wanderRadius);
                 Gizmos.color = Color.red;
                 Gizmos.DrawSphere(wanderTarget.Position, 0.2f);
@@ -89,5 +80,3 @@ public class Wander : Face
         }
     }
 }
-
-
