@@ -40,9 +40,6 @@ public class PathFollowing : Seek
     private void Awake()
     {
         this.nameSteering = "PathFollowing";
-
-        
-
     }
 
     private void Start()
