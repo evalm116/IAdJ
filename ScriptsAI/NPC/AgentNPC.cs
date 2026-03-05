@@ -1,6 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
+public enum NPCType
+{
+    Coward, 
+    Normal, 
+    Aggressive
+}
 
 public class AgentNPC : Agent
 { 
@@ -9,8 +17,10 @@ public class AgentNPC : Agent
     // Todos los steering que tiene que calcular el agente.
     private List<SteeringBehaviour> listSteerings;
 
+    public NPCType currentType;
 
-    protected  void Awake()
+
+    protected void Awake()
     {
         this.steer = new Steering();
 
@@ -50,10 +60,35 @@ public class AgentNPC : Agent
         transform.Rotate(Vector3.up, Orientation);
     }
 
+    // Método para configurar los pesos según el tipo de NPC
+    private void ApplyProfileWeights()
+    {
+        foreach (SteeringBehaviour behavior in listSteerings)
+        {
+            switch (currentType)
+            {
+                case NPCType.Coward:
+                    if (behavior is Flee) behavior.weight = 2.0f;
+                    if (behavior is Wander) behavior.weight = 1.5f;
+                    break;
+
+                case NPCType.Normal:
+                    if (behavior is Arrive) behavior.weight = 1.0f;
+                    //if (behavior is LookAt) behavior.weight = 0.8f;
+                    break;
+
+                case NPCType.Aggressive:
+                    if (behavior is Seek) behavior.weight = 2.0f;
+                    break;
+            }
+        }
+    }
 
 
     public virtual void LateUpdate()
     {
+        ApplyProfileWeights();
+
         Steering kinematicFinal = new Steering();
 
         // Reseteamos el steering final.
@@ -64,8 +99,8 @@ public class AgentNPC : Agent
         {
             Steering kinematic = behavior.GetSteering(this);
 
-            kinematicFinal.linear += kinematic.linear;
-            kinematicFinal.angular += kinematic.angular;
+            kinematicFinal.linear += kinematic.linear * behavior.weight;
+            kinematicFinal.angular += kinematic.angular * behavior.weight;
         }
         //// La cinemática de este SteeringBehaviour se tiene que combinar
         //// con las cinemáticas de los demás SteeringBehaviour.

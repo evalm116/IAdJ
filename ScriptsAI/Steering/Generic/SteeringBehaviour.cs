@@ -17,6 +17,8 @@ public class SteeringBehaviour : MonoBehaviour
 
     // Target sobre el que se calcula el comportamiento
     public Agent target;
+    public float weight = 1.0f;
+
 
     /// <summary>
     /// Cada SteerinBehaviour retornará un Steering=(vector, escalar)
