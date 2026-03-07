@@ -18,7 +18,7 @@ public class Agent : Bodi
     [SerializeField] protected float _exteriorAngle = 8.0f; // ángulo sexagesimal.
 
     [Header("Debug")]
-    [SerializeField] protected bool _showGizmos = true;
+    [SerializeField] protected bool _showGizmos = false;
     [SerializeField] protected Color _innerColor = new Color(1f, 0f, 0f, 0.6f);
     [SerializeField] protected Color _outerColor = new Color(0f, 0f, 1f, 0.6f);
 
