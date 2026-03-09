@@ -15,6 +15,16 @@ public class FormationManager : MonoBehaviour
     // Referencia al mapa 
     public Grid gridManager;
 
+    // Método para saber si un tanque ya está en esta formación
+    public bool IsInFormation(AgentNPC character)
+    {
+        foreach (SlotAssignment slot in slotAssignments)
+        {
+            if (slot.character == character) return true;
+        }
+        return false;
+    }
+
 
     private void UpdateSlotAssignments()
     {
@@ -110,18 +120,7 @@ public class FormationManager : MonoBehaviour
     {
         pattern = new PatternLine(); // O PatternLine()
 
-        // TRUCO TEMPORAL PARA PROBAR:
-        // Asumiendo que tienes dos tanques en la escena llamados "Tanque1" y "Tanque2"
-        AgentNPC t1 = GameObject.Find("Tanque1").GetComponent<AgentNPC>();
-        AgentNPC t2 = GameObject.Find("Tanque2").GetComponent<AgentNPC>();
-        AgentNPC t3 = GameObject.Find("Coche").GetComponent<AgentNPC>();
-        AgentNPC t4 = GameObject.Find("Persona").GetComponent<AgentNPC>();
 
-
-        if (t1 != null) AddCharacter(t1);
-        if (t2 != null) AddCharacter(t2);
-        if (t3 != null) AddCharacter(t3);
-        if (t4 != null) AddCharacter(t4);
     }
 
 

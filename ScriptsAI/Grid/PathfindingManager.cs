@@ -15,7 +15,7 @@ public class PathfindingManager : MonoBehaviour
 
         List<GridCell> neighbors = gameGrid.GetNeighbors(currentCell);
 
-        // 1. EVALUAR VECINOS (Lookahead-One)
+        // 1. EVALUAR VECINOS 
         foreach (GridCell neighbor in neighbors)
         {
             // if (neighbor.isOccupied) continue;

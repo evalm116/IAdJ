@@ -7,22 +7,37 @@ public class Grid : MonoBehaviour
     public int columnas;
     public int filas;
     public float cellSize;
+    public Transform padreObstaculos;
 
-    //public Vector2Int liderPosicion;
-
-    public GridCell[,] gridArray; // Declaramos la matriz 2D usando tu nueva clase
+    public GridCell[,] gridArray;
 
     private void Awake()
     {
-        // Inicializamos el tamaño de la matriz
         gridArray = new GridCell[columnas, filas];
+        float radioComprobacion = cellSize / 2.1f;
 
         for (int x = 0; x < columnas; x++)
         {
             for (int z = 0; z < filas; z++)
             {
-                // Rellenamos cada hueco con un nuevo objeto GridCell
+                // 1. Creamos la celda por defecto transitable
                 gridArray[x, z] = new GridCell(new Vector2Int(x, z));
+                Vector3 centroCelda = GetCellCenter(x, z);
+
+                // 2. Obtenemos TODOS los colisionadores que tocan el centro de esta celda
+                Collider[] collidersDetectados = Physics.OverlapSphere(centroCelda, radioComprobacion);
+
+                // 3. Revisamos uno a uno lo que hemos tocado
+                foreach (Collider col in collidersDetectados)
+                {
+                    // Comprobamos si el objeto que hemos tocado es hijo del Empty "obstaculos"
+                    // (También comprobamos que el padre no sea nulo para evitar errores)
+                    if (col.transform.parent != null && col.transform.parent == padreObstaculos)
+                    {
+                        gridArray[x, z].isWalkable = false; // ¡Es un muro!
+                        break; // Como ya sabemos que está bloqueada, dejamos de comprobar el resto
+                    }
+                }
             }
         }
     }
@@ -70,13 +85,13 @@ public class Grid : MonoBehaviour
         int z = cell.gridPosition.y; // Ojo: en Vector2Int 'y' representa tu 'z' del mundo
 
         // Arriba
-        if (z + 1 < filas) neighbors.Add(gridArray[x, z + 1]);
+        if (z + 1 < filas && gridArray[x, z + 1].isWalkable) neighbors.Add(gridArray[x, z + 1]);
         // Abajo
-        if (z - 1 >= 0) neighbors.Add(gridArray[x, z - 1]);
+        if (z - 1 >= 0 && gridArray[x, z - 1].isWalkable) neighbors.Add(gridArray[x, z - 1]);
         // Derecha
-        if (x + 1 < columnas) neighbors.Add(gridArray[x + 1, z]);
+        if (x + 1 < columnas && gridArray[x + 1, z].isWalkable) neighbors.Add(gridArray[x + 1, z]);
         // Izquierda
-        if (x - 1 >= 0) neighbors.Add(gridArray[x - 1, z]);
+        if (x - 1 >= 0 && gridArray[x - 1, z].isWalkable) neighbors.Add(gridArray[x - 1, z]);
 
         // Si permites diagonales, añadirías las 4 comprobaciones extra aquí
 
