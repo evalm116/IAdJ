@@ -1,19 +1,24 @@
 using UnityEngine;
 
-[System.Serializable] // Fundamental para que Unity nos deje ver los datos en el Inspector si queremos depurar
+[System.Serializable]
 public class GridCell
 {
-    public Vector2Int gridPosition; // Coordenadas (X, Z) de esta celda en la matriz
-    public bool isOccupied;         // ¿Hay algún NPC asignado a esta casilla?
-    public GameObject occupant;     // Si está ocupada, ¿quién es el NPC exacto que la ocupa?
-    public float cost;              // Coste de movimiento (útil si más adelante metes zonas de barro o asfalto)
+    public Vector2Int gridPosition; 
+    public bool isOccupied;         
+    public GameObject occupant;     
+    public float cost;              
 
-    // Constructor: Se ejecuta cuando el Grid crea esta celda por primera vez
+    // NUEVO: Variables para LRTA*
+    public float learnedHeuristic; // Guarda el valor h(u) aprendido
+    
     public GridCell(Vector2Int pos)
     {
         gridPosition = pos;
         isOccupied = false;
         occupant = null;
-        cost = 1f; // Por defecto, el coste de pisar la celda es normal (1)
+        cost = 1f; 
+        
+        // Inicializamos la heurística en -1 para saber que aún no se ha calculado nunca
+        learnedHeuristic = -1f; 
     }
 }

@@ -61,6 +61,27 @@ public class Grid : MonoBehaviour
         float zPos = transform.position.z + (offsetZ * cellSize) + (cellSize / 2);
         return new Vector3(xPos, transform.position.y, zPos);
     }
+
+    // Método para obtener los vecinos de una celda (arriba, abajo, izquierda, derecha)
+    public List<GridCell> GetNeighbors(GridCell cell)
+    {
+        List<GridCell> neighbors = new List<GridCell>();
+        int x = cell.gridPosition.x;
+        int z = cell.gridPosition.y; // Ojo: en Vector2Int 'y' representa tu 'z' del mundo
+
+        // Arriba
+        if (z + 1 < filas) neighbors.Add(gridArray[x, z + 1]);
+        // Abajo
+        if (z - 1 >= 0) neighbors.Add(gridArray[x, z - 1]);
+        // Derecha
+        if (x + 1 < columnas) neighbors.Add(gridArray[x + 1, z]);
+        // Izquierda
+        if (x - 1 >= 0) neighbors.Add(gridArray[x - 1, z]);
+
+        // Si permites diagonales, añadirías las 4 comprobaciones extra aquí
+
+        return neighbors;
+    }
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.gray;
