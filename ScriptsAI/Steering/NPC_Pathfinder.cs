@@ -1,6 +1,7 @@
+using System.Runtime;
 using UnityEngine;
 
-public class NPC_Pathfinder : MonoBehaviour
+public class NPC_Pathfinder : Seek
 {
     [Header("Referencias")]
     public PathfindingManager pathManager;
@@ -15,13 +16,18 @@ public class NPC_Pathfinder : MonoBehaviour
 
     void Start()
     {
+        if (target == null)
+        {
+            GameObject dummy = new GameObject("DummyPathTarget");
+            target = dummy.AddComponent<Agent>();
+        }
         PedirSiguientePaso();
     }
 
-    void Update()
+    public override Steering GetSteering(AgentNPC character)
     {
         // Si no tenemos objetivo o celda a la que ir, no hacemos nada
-        if (objetivo == null || celdaDestinoActual == null) return;
+        if (objetivo == null || celdaDestinoActual == null) return new Steering();
 
         // 1. Obtenemos la posición física (Vector3) del centro de la celda a la que vamos
         int x = celdaDestinoActual.gridPosition.x;
@@ -29,7 +35,7 @@ public class NPC_Pathfinder : MonoBehaviour
         Vector3 puntoDestino = gameGrid.GetCellCenter(x, z);
 
         // 2. STEERING BÁSICO (Seek): Nos movemos hacia ese punto
-        transform.position = Vector3.MoveTowards(transform.position, puntoDestino, velocidad * Time.deltaTime);
+        target.Position = Vector3.MoveTowards(transform.position, puntoDestino, velocidad * Time.deltaTime);
 
         // 3. COMPROBACIÓN DE LLEGADA
         if (Vector3.Distance(transform.position, puntoDestino) < 0.1f)
@@ -37,6 +43,8 @@ public class NPC_Pathfinder : MonoBehaviour
             // Hemos llegado a la casilla, ¡toca pensar el siguiente paso!
             PedirSiguientePaso();
         }
+
+        return base.GetSteering(character);
     }
 
     private void PedirSiguientePaso()

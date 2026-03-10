@@ -10,7 +10,7 @@ public class GridCell
 
     public bool isWalkable;
 
-    public float learnedHeuristic; // Guarda el valor h(u) aprendido
+    public float learnedHeuristic;
 
     // Constructor
     public GridCell(Vector2Int pos)

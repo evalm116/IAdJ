@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 public class Grid : MonoBehaviour
 {
     public int columnas;
@@ -93,20 +92,20 @@ public class Grid : MonoBehaviour
         // Izquierda
         if (x - 1 >= 0 && gridArray[x - 1, z].isWalkable) neighbors.Add(gridArray[x - 1, z]);
 
-        // Si permites diagonales, añadirías las 4 comprobaciones extra aquí
-
         return neighbors;
     }
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.gray;
+
         for (int x = 0; x < columnas; x++)
         {
             for (int z = 0; z < filas; z++)
             {
+                Gizmos.color = Color.gray;
                 Vector3 cellCenter = GetCellCenter(x, z);
-
                 Gizmos.DrawWireCube(cellCenter, new Vector3(cellSize, 0f, cellSize));
+                Gizmos.color = gridArray != null && !gridArray[x, z].isWalkable ? Color.red : Color.green;
+                Gizmos.DrawSphere(cellCenter, cellSize / 4);
             }
         }
     }
