@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
@@ -10,11 +11,12 @@ public class PathfindingManager : MonoBehaviour
     {
         GridCell currentCell = startCell;
         HashSet<GridCell> espacioBusqueda;
-        while (currentCell != goalCell)
+        if(currentCell != goalCell) 
         {
             espacioBusqueda = getEspacioBusqueda(currentCell, goalCell, 1);
 
             //algoritmo 11.2 (calcula la heuristica de las celdas del espacio de búsqueda)
+            ValueUpdateStep(currentCell, goalCell, espacioBusqueda);
 
             currentCell = GetNextStepLRTA(currentCell, goalCell);
             if (currentCell == null)
@@ -63,12 +65,31 @@ public class PathfindingManager : MonoBehaviour
     public void ValueUpdateStep(GridCell currentCell, GridCell goalCell, HashSet<GridCell> espacioBusqueda)
     {
         List<(GridCell, float)> oldValues = new List<(GridCell, float)>();
+        List<GridCell> infinitos = new List<GridCell>();
         foreach (GridCell cell in espacioBusqueda)
         {
+            if (cell.learnedHeuristic == -1)
+                cell.learnedHeuristic = CalculateManhattanHeuristic(cell, goalCell);
             oldValues.Add((cell, cell.learnedHeuristic));
             cell.learnedHeuristic = float.MaxValue;
+            infinitos.Add(cell);
         }
 
+        while (infinitos.Any())
+        {
+            GridCell actual;
+            float new_value;
+            (actual, new_value)= getMin(infinitos, oldValues, goalCell);
+            infinitos.Remove(actual);
+            actual.learnedHeuristic = new_value;
+
+            if (actual.learnedHeuristic == float.MaxValue)
+            {
+                Debug.LogWarning("No se encontró un camino válido.");
+                return;
+            }
+        }
+        /*
         foreach (GridCell cell in espacioBusqueda)
         {
 
@@ -82,12 +103,53 @@ public class PathfindingManager : MonoBehaviour
                     minF = f;
                 }
             }
-            cell.learnedHeuristic = Mathf.Max(cell.learnedHeuristic, minF);
+            cell.learnedHeuristic = Mathf.Max(cell.learnedHeuristic, cell.cost + minF);
+            pq.Add(cell);
         }
 
-        //FALTA EL PASO 4
+        // Ordenar de menor a mayor según el valor de learnedHeuristic
+        pq.Sort((a, b) => a.learnedHeuristic.CompareTo(b.learnedHeuristic));
+        
+        while (pq.Any())
+        {
+            
+        }*/
 
     }
+
+    private (GridCell, float) getMin(List<GridCell> infinitos, List<(GridCell, float)> oldValues, GridCell goalCell)
+    {
+        float minValue = float.MaxValue;
+        GridCell minCell = null;
+
+        foreach (GridCell cell in infinitos)
+        {
+            float oldValue = oldValues.FirstOrDefault(x => x.Item1 == cell).Item2;
+
+            float bestCost = float.MaxValue;
+            grid.GetNeighbors(cell).ForEach(neighbor =>
+            {
+                if (neighbor.learnedHeuristic == -1)
+                    CalculateManhattanHeuristic(neighbor, goalCell);
+                float f = cell.cost + neighbor.learnedHeuristic;
+                if (f < bestCost)
+                {
+                    bestCost = f;
+                }
+            });
+
+            float value = Mathf.Max(oldValue, bestCost);
+
+            if (value < minValue)
+            {
+                minValue = value;
+                minCell = cell;
+            }
+        }
+
+        return (minCell, minValue);
+    }
+
     public GridCell GetNextStepLRTA(GridCell currentCell, GridCell goalCell)
     {
         // Si ya estamos en la meta, no nos movemos

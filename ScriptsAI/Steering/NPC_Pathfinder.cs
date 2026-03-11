@@ -68,7 +68,8 @@ public class NPC_Pathfinder : Seek
         GridCell miCelda = gameGrid.gridArray[miPosicionGrid.x, miPosicionGrid.y];
         GridCell celdaMeta = gameGrid.gridArray[metaPosicionGrid.x, metaPosicionGrid.y];
 
-        celdaDestinoActual = pathManager.GetNextStepLRTA(miCelda, celdaMeta);
+        //celdaDestinoActual = pathManager.GetNextStepLRTA(miCelda, celdaMeta);
+        celdaDestinoActual = pathManager.procedureLRTA(miCelda, celdaMeta);
     }
 
     private bool PosicionValida(Vector2Int pos)
