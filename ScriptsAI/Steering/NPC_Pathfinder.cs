@@ -54,22 +54,32 @@ public class NPC_Pathfinder : Seek
         // A. Calculamos en qué celda (X, Z) estamos nosotros ahora mismo
         Vector2Int miPosicionGrid = gameGrid.GetGridPosition(transform.position);
 
-        // B. Calculamos en qué celda (X, Z) está nuestra meta final
-        Vector2Int metaPosicionGrid = gameGrid.GetGridPosition(objetivo.position);
 
-        // OJO: Nos aseguramos de no salirnos de los límites del array
-        if (!PosicionValida(miPosicionGrid) || !PosicionValida(metaPosicionGrid))
+        if (!PosicionValida(miPosicionGrid))
         {
-            Debug.LogWarning("El NPC o el Objetivo están fuera del Grid.");
+            Debug.LogWarning("El NPC están fuera del Grid.");
             return;
         }
 
         // C. Cogemos las celdas reales del array
         GridCell miCelda = gameGrid.gridArray[miPosicionGrid.x, miPosicionGrid.y];
-        GridCell celdaMeta = gameGrid.gridArray[metaPosicionGrid.x, metaPosicionGrid.y];
 
+        if (pathManager.GoalCell == null)
+        {
+            // B. Calculamos en qué celda (X, Z) está nuestra meta final
+            Vector2Int metaPosicionGrid = gameGrid.GetGridPosition(objetivo.position);
+
+            if (!PosicionValida(metaPosicionGrid))
+            {
+                Debug.LogWarning("El Objetivo están fuera del Grid.");
+                return;
+            }
+
+            GridCell celdaMeta = gameGrid.gridArray[metaPosicionGrid.x, metaPosicionGrid.y];
+            pathManager.GoalCell = celdaMeta;
+        }
         //celdaDestinoActual = pathManager.GetNextStepLRTA(miCelda, celdaMeta);
-        celdaDestinoActual = pathManager.procedureLRTA(miCelda, celdaMeta);
+        celdaDestinoActual = pathManager.procedureLRTA(miCelda);
     }
 
     private bool PosicionValida(Vector2Int pos)

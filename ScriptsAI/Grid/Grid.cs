@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 public class Grid : MonoBehaviour
 {
@@ -104,8 +106,50 @@ public class Grid : MonoBehaviour
                 Gizmos.color = Color.gray;
                 Vector3 cellCenter = GetCellCenter(x, z);
                 Gizmos.DrawWireCube(cellCenter, new Vector3(cellSize, 0f, cellSize));
-                Gizmos.color = gridArray != null && !gridArray[x, z].isWalkable ? Color.red : Color.green;
-                Gizmos.DrawSphere(cellCenter, cellSize / 4);
+                /*Gizmos.color = gridArray != null && !gridArray[x, z].isWalkable ? Color.red : Color.green;
+                Gizmos.DrawSphere(cellCenter, cellSize / 4);*/
+
+                // If gridArray is not initialized (e.g. in edit-time before Awake) skip accessing it
+                if (gridArray == null || x < 0 || x >= gridArray.GetLength(0) || z < 0 || z >= gridArray.GetLength(1))
+                {
+                    continue;
+                }
+
+                // For non-walkable cells keep the red sphere to indicate obstacles
+                if (!gridArray[x, z].isWalkable)
+                {
+                    Gizmos.color = Color.red;
+                    Gizmos.DrawSphere(cellCenter, cellSize / 4);
+                }
+                else
+                {
+#if UNITY_EDITOR
+                    // For walkable cells draw the learnedHeuristic value as a label above the cell
+                    int learned = (int)gridArray[x, z].learnedHeuristic;
+                    string label = learned < 0f ? "-" : learned.ToString();
+
+                    // Small upward offset so the label sits above the cell
+                    Vector3 labelPos = cellCenter + Vector3.up * (cellSize * 0.02f);
+
+                    GUIStyle style = new GUIStyle();
+                    style.alignment = TextAnchor.MiddleCenter;
+                    style.normal.textColor = Color.white;
+                    style.fontSize = Mathf.Clamp((int)(cellSize * 6), 8, 16);
+
+                    Handles.Label(labelPos, label, style);
+#endif
+                }
+            }
+        }
+    }
+
+    internal void ResetHeuristics()
+    {
+        for (int x = 0; x < columnas; x++)
+        {
+            for (int z = 0; z < filas; z++)
+            {
+                gridArray[x, z].learnedHeuristic = -1.0f;
             }
         }
     }
