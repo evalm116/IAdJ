@@ -65,6 +65,13 @@ public class FormationManager : MonoBehaviour
                 arriveScript.target = dummy;
                 arriveScript.enabled = true; 
             }
+            // le asignamos el fantasma al Face para que mire hacia él mientras está en formación
+            Face faceScript = character.GetComponent<Face>();
+            if (faceScript != null)
+            {
+                faceScript.target = dummy;
+                faceScript.enabled = true;
+            }
 
             slotAssignments.Add(newAssignment);
             
@@ -101,6 +108,13 @@ public class FormationManager : MonoBehaviour
                 arriveScript.target = null;
                 arriveScript.enabled = false; 
             }
+            // Apagamos el Face y le quitamos el target
+            Face faceScript = npcToLeave.GetComponent<Face>();
+            if (faceScript != null)
+            {
+                faceScript.target = null;
+                faceScript.enabled = false;
+            }
 
             // Destruimos el fantasma para no dejar basura en la escena
             if (slotAssignments[indexToRemove].dummyTarget != null)
@@ -118,9 +132,18 @@ public class FormationManager : MonoBehaviour
 
     void Start()
     {
-        pattern = new PatternLine(); // O PatternLine()
+        pattern = new PatternV(); 
 
-
+        // lider el hueco 0, el resto se asigna al añadirlos a la formación
+        AgentNPC miPropioNPC = GetComponent<AgentNPC>();
+        if (miPropioNPC != null)
+        {
+            SlotAssignment leaderSlot = new SlotAssignment();
+            leaderSlot.character = miPropioNPC;
+            leaderSlot.slotNumber = 0;
+            // Al líder NO le creamos dummyTarget, porque él no persigue a nadie de la formación.
+            slotAssignments.Add(leaderSlot);
+        }
     }
 
 
@@ -132,13 +155,10 @@ public class FormationManager : MonoBehaviour
         // Recorremos cada soldado en la formación
         for (int i = 0; i < slotAssignments.Count; i++)
         {
-            // 1. Pedimos la posición local al patrón (Ej: "2 metros a la derecha")
+            // Pedimos la posición local al patrón
             Vector3 relativeLoc = pattern.GetSlotLocation(slotAssignments[i].slotNumber);
 
-            // 2. Le restamos el driftOffset para compensar derrapes
-            relativeLoc -= driftOffset;
-
-            // 3. TransformPoint: Convierte esa coordenada local a mundo real usando
+            // TransformPoint: Convierte esa coordenada local a mundo real usando
             //    la rotación y posición del Líder (este GameObject llamado "anchor")
             Vector3 targetPosition = transform.TransformPoint(relativeLoc);
 

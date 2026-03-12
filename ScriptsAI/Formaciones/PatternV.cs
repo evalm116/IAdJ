@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 public class PatternV : FormationPattern
 {
-    public float separationX = 2f; // Separación lateral
-    public float separationZ = 2f; // Separación hacia atrás
+    public float separationX = 1f; // Separación lateral
+    public float separationZ = 1f; // Separación hacia atrás
 
     public override Vector3 GetSlotLocation(int slotNumber)
     {
