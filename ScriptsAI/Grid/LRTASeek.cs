@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class PathfindingManager : MonoBehaviour
+public class LRTASeek : MonoBehaviour
 {
     public enum HeuristicType
     {

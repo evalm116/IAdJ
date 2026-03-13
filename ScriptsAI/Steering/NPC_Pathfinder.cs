@@ -4,7 +4,7 @@ using UnityEngine;
 public class NPC_Pathfinder : Seek
 {
     [Header("Referencias")]
-    public PathfindingManager pathManager;
+    public LRTASeek pathManager;
     public Grid gameGrid;
     public Transform objetivo; // El objeto al que queremos llegar 
     private Vector2Int _celdaObjetivo;
@@ -95,15 +95,5 @@ public class NPC_Pathfinder : Seek
         
         celdaDestinoActual = pathManager.FindPath(miCelda, radioEspacioBusqueda);      
             
-    }
-
-    private float GetArriveDistance(AgentNPC character)
-    {
-        if (character.Velocity.magnitude > 0)
-        {
-            return 0.04f * character.Velocity.magnitude;            
-        }
-        // Si está parado devolvemos distancia fija
-        return 0.1f; 
     }
 }

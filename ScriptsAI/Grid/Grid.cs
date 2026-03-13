@@ -13,7 +13,7 @@ public class Grid : MonoBehaviour
     public GridCell[,] gridArray;
 
     [Header("Debug")]
-    public PathfindingManager debugHeuristics;
+    public LRTAStar debugHeuristics;
 
     private void Awake()
     {
@@ -157,6 +157,33 @@ public class Grid : MonoBehaviour
 
     public bool PosicionValida(Vector2Int pos)
     {
-        return pos.x >= 0 && pos.x < columnas && pos.y >= 0 && pos.y < filas;
+        return PosicionValida(pos.x, pos.y);
     }
+
+    public bool PosicionValida(int x, int z)
+    {
+        return x >= 0 && x < columnas && z >= 0 && z < filas;
+    }
+
+    public GridCell GetCellAt(Vector3 position)
+    {
+        Vector2Int cellPosition = GetGridPosition(position);
+        if (!PosicionValida(cellPosition))
+        {
+            Debug.LogError($"Posición de celda ({cellPosition.x}, {cellPosition.y}) fuera de los límites del grid.");
+            return null;
+        }
+        return gridArray[cellPosition.x, cellPosition.y];
+    }
+
+    public GridCell GetCellAt(int x, int z)
+    {
+        if (!PosicionValida(x,z))
+        {
+            Debug.LogError($"Posición de celda ({x}, {z}) fuera de los límites del grid.");
+            return null;
+        }
+        return gridArray[x, z];
+    }
+
 }
