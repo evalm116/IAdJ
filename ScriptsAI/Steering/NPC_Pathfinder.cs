@@ -29,18 +29,22 @@ public class NPC_Pathfinder : Seek
         // Si no tenemos objetivo o celda a la que ir, no hacemos nada
         if (objetivo == null || celdaDestinoActual == null) return new Steering();
 
-        // 1. Obtenemos la posición física (Vector3) del centro de la celda a la que vamos
         int x = celdaDestinoActual.gridPosition.x;
         int z = celdaDestinoActual.gridPosition.y;
         Vector3 puntoDestino = gameGrid.GetCellCenter(x, z);
 
-        // 2. STEERING BÁSICO (Seek): Nos movemos hacia ese punto
-        target.Position = Vector3.MoveTowards(transform.position, puntoDestino, velocidad * Time.deltaTime);
+        if (Vector3.Distance(objetivo.position, puntoDestino) <= 0.15f)
+        {
+            character.StopMoving();
+            return new Steering(); // Ya hemos llegado al objetivo final
+        }
 
-        // 3. COMPROBACIÓN DE LLEGADA
+
+        target.Position = puntoDestino;
+
+        // Se llega al punto destino, se pide el siguiente paso
         if (Vector3.Distance(transform.position, puntoDestino) < 0.1f)
         {
-            // Hemos llegado a la casilla, ¡toca pensar el siguiente paso!
             PedirSiguientePaso();
         }
 
@@ -79,7 +83,7 @@ public class NPC_Pathfinder : Seek
             pathManager.GoalCell = celdaMeta;
         }
         //celdaDestinoActual = pathManager.GetNextStepLRTA(miCelda, celdaMeta);
-        celdaDestinoActual = pathManager.procedureLRTA(miCelda);
+        celdaDestinoActual = pathManager.FindPath(miCelda, 1);
     }
 
     private bool PosicionValida(Vector2Int pos)

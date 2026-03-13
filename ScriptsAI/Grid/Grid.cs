@@ -17,31 +17,38 @@ public class Grid : MonoBehaviour
         gridArray = new GridCell[columnas, filas];
         float radioComprobacion = cellSize / 2.1f;
 
+
+        // Calcular que celdas y si son transitables
         for (int x = 0; x < columnas; x++)
         {
             for (int z = 0; z < filas; z++)
             {
-                // 1. Creamos la celda por defecto transitable
-                gridArray[x, z] = new GridCell(new Vector2Int(x, z));
+                // Crear celda en x,z
+                // Por defecto transitable en constructor
+                gridArray[x, z] = new GridCell(new Vector2Int(x, z)); 
                 Vector3 centroCelda = GetCellCenter(x, z);
 
-                // 2. Obtenemos TODOS los colisionadores que tocan el centro de esta celda
+                // Obtenemos TODOS los colisionadores que tocan el centro de esta celda
                 Collider[] collidersDetectados = Physics.OverlapSphere(centroCelda, radioComprobacion);
 
-                // 3. Revisamos uno a uno lo que hemos tocado
+                // El colisionador solo bloquea si es del padreObstaculos
                 foreach (Collider col in collidersDetectados)
-                {
-                    // Comprobamos si el objeto que hemos tocado es hijo del Empty "obstaculos"
-                    // (También comprobamos que el padre no sea nulo para evitar errores)
+                {                    
                     if (col.transform.parent != null && col.transform.parent == padreObstaculos)
                     {
-                        gridArray[x, z].isWalkable = false; // ¡Es un muro!
+                        gridArray[x, z].isWalkable = false;
                         break; // Como ya sabemos que está bloqueada, dejamos de comprobar el resto
                     }
                 }
             }
         }
     }
+    /// <summary>
+    /// Obtener posición del centro de una celda dada su posición en el grid.
+    /// </summary>
+    /// <param name="x">Posición x en el grid</param>
+    /// <param name="z">Posición z en el grid</param>
+    /// <returns>Posición del centro de la celda en el mundo 3D</returns>
     public Vector3 GetCellCenter(int x, int z)
     {
         float xPos = transform.position.x + (x * cellSize) + (cellSize / 2);
@@ -49,15 +56,11 @@ public class Grid : MonoBehaviour
         return new Vector3(xPos, transform.position.y, zPos);
     }
 
-    //dada una posicion (i,j) del grid retornar la posicion del mundo
-    public Vector3 GetWorldPosition(int x, int z)
-    {
-        float xPos = transform.position.x + (x * cellSize);
-        float zPos = transform.position.z + (z * cellSize);
-        return new Vector3(xPos, transform.position.y, zPos);
-    }
-
-    //dada una posicion del mundo retornar la posicion del grid
+    /// <summary>
+    /// Dada una posición en el mundo 3D, obtener la posición correspondiente en el grid (x,z).
+    /// </summary>
+    /// <param name="worldPosition">Posición en el mundo 3D.</param>
+    /// <returns>Posición de celda que lo contiene en el grid.</returns>
     public Vector2Int GetGridPosition(Vector3 worldPosition)
     {
         int x = Mathf.FloorToInt((worldPosition.x - transform.position.x) / cellSize);
@@ -78,7 +81,12 @@ public class Grid : MonoBehaviour
         return new Vector3(xPos, transform.position.y, zPos);
     }
 
-    // Método para obtener los vecinos de una celda (arriba, abajo, izquierda, derecha)
+    
+    /// <summary>
+    /// Dada una celda, retorna una lista de las celdas vecinas transitables (arriba, abajo, izquierda, derecha).
+    /// </summary>
+    /// <param name="cell">Celda origen.</param>
+    /// <returns>Celdas vecinas transitables de la celda de entrada.</returns>
     public List<GridCell> GetNeighbors(GridCell cell)
     {
         List<GridCell> neighbors = new List<GridCell>();
@@ -98,6 +106,7 @@ public class Grid : MonoBehaviour
     }
     private void OnDrawGizmos()
     {
+        if (gridArray == null) return;
 
         for (int x = 0; x < columnas; x++)
         {
@@ -106,29 +115,25 @@ public class Grid : MonoBehaviour
                 Gizmos.color = Color.gray;
                 Vector3 cellCenter = GetCellCenter(x, z);
                 Gizmos.DrawWireCube(cellCenter, new Vector3(cellSize, 0f, cellSize));
+
+                // 
                 /*Gizmos.color = gridArray != null && !gridArray[x, z].isWalkable ? Color.red : Color.green;
                 Gizmos.DrawSphere(cellCenter, cellSize / 4);*/
 
-                // If gridArray is not initialized (e.g. in edit-time before Awake) skip accessing it
-                if (gridArray == null || x < 0 || x >= gridArray.GetLength(0) || z < 0 || z >= gridArray.GetLength(1))
-                {
-                    continue;
-                }
-
-                // For non-walkable cells keep the red sphere to indicate obstacles
+                // Dibujamos una esfera roja si la celda no es transitable, 
                 if (!gridArray[x, z].isWalkable)
                 {
                     Gizmos.color = Color.red;
                     Gizmos.DrawSphere(cellCenter, cellSize / 4);
                 }
-                else
+                else // Si es transitable dibujamos su heurística encima de la celda
                 {
+                    // #if necesario para evitar errores de Handles en builds, aunque no es necesario para Gizmos
 #if UNITY_EDITOR
-                    // For walkable cells draw the learnedHeuristic value as a label above the cell
                     int learned = (int)gridArray[x, z].learnedHeuristic;
                     string label = learned < 0f ? "-" : learned.ToString();
 
-                    // Small upward offset so the label sits above the cell
+                    // Offset arriba para que no se solape con el suelo
                     Vector3 labelPos = cellCenter + Vector3.up * (cellSize * 0.02f);
 
                     GUIStyle style = new GUIStyle();

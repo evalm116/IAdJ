@@ -1,13 +1,21 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
 using UnityEngine;
 
 public class PathfindingManager : MonoBehaviour
 {
+    public enum HeuristicType
+    {
+        Manhattan,
+        Euclidean,
+        Chebyshev
+    }
+
+    public HeuristicType heuristicType = HeuristicType.Manhattan;
+
     public Grid grid;
     private GridCell _goalCell;
+    private bool _caminoValido = true;
     public GridCell GoalCell
     {
         get => _goalCell;
@@ -18,38 +26,50 @@ public class PathfindingManager : MonoBehaviour
             grid.ResetHeuristics();
         }
     }
-    public GridCell procedureLRTA(GridCell startCell)
+
+    /// <summary>
+    /// Calcula el siguiente paso a seguir desde la celda de inicio utilizando el algoritmo LRTA*.
+    /// En esta versión solo se calcula el siguiente paso, no toda la ruta.  Algoritmo según el libro 
+    /// "Edelkamp, S., & Schrödl, S. (2012). Heuristic search : theory and applications Stefan Edelkamp,
+    /// Stefan Schrödl. (1st edition). Morgan Kaufmann." Página 471 algoritmo 11.1.
+    /// </summary>
+    /// <param name="startCell">Posición actual del personaje</param>
+    /// <returns>La siguiente celda a alcanzar</returns>
+    public GridCell FindPath(GridCell startCell, int radioEspacioBusqueda)
     {
         GridCell currentCell = startCell;
         HashSet<GridCell> espacioBusqueda;
-        if (currentCell != GoalCell)
+        if (currentCell != GoalCell && _caminoValido)
         {
-            espacioBusqueda = getEspacioBusqueda(currentCell, GoalCell, 1);
+            espacioBusqueda = GetEspacioBusqueda(currentCell, radioEspacioBusqueda);
 
             //algoritmo 11.2 (calcula la heuristica de las celdas del espacio de búsqueda)
-            ValueUpdateStep(currentCell, GoalCell, espacioBusqueda);
+            ValueUpdateStep(GoalCell, espacioBusqueda);
 
-            currentCell = GetNextStepLRTA(currentCell);
-            if (currentCell == null)
+            do
             {
-                Debug.LogWarning("No se encontró un camino válido.");
-                return null;
-            }
-            while (espacioBusqueda.Contains(currentCell))
-            {
-                currentCell = GetNextStepLRTA(currentCell);
+                currentCell = GetNextStep(currentCell);
                 if (currentCell == null)
                 {
                     Debug.LogWarning("No se encontró un camino válido.");
+                    _caminoValido = false;
                     return null;
                 }
             }
+            while (espacioBusqueda.Contains(currentCell));
         }
 
         return currentCell;
     }
 
-    public HashSet<GridCell> getEspacioBusqueda(GridCell currentCell, GridCell goalCell, int tamanoEspacio)
+
+    /// <summary>
+    /// Calcula el espacio de búsqueda a partir de la celda actual. Consideramos que el personaje solo se mueve en vertical y horizontal.
+    /// </summary>
+    /// <param name="currentCell">Celda origen</param>
+    /// <param name="tamanoEspacio">Radio del espacio de búsqueda</param>
+    /// <returns></returns>
+    public HashSet<GridCell> GetEspacioBusqueda(GridCell currentCell, int tamanoEspacio)
     {
         HashSet<GridCell> espacioBusqueda = new HashSet<GridCell>
         {
@@ -61,26 +81,35 @@ public class PathfindingManager : MonoBehaviour
         List<GridCell> neighbors = grid.GetNeighbors(currentCell);
         foreach (GridCell neighbor in neighbors)
         {
-            if (!espacioBusqueda.Contains(neighbor) && neighbor != goalCell)
+            if (!espacioBusqueda.Contains(neighbor) && neighbor != GoalCell)
             {
                 espacioBusqueda.Add(neighbor);
                 if (tamanoEspacio > 1)
                 {
-                    espacioBusqueda.UnionWith(getEspacioBusqueda(neighbor, goalCell, tamanoEspacio - 1));
+                    espacioBusqueda.UnionWith(GetEspacioBusqueda(neighbor, tamanoEspacio - 1));
                 }
             }
         }
-        
+
         return espacioBusqueda;
     }
 
-    public void ValueUpdateStep(GridCell currentCell, GridCell goalCell, HashSet<GridCell> espacioBusqueda)
+    /// <summary>
+    /// Calculamos la heurística de las celdas del espacio de búsqueda utilizando el algoritmo de actualización de valores 
+    /// (Value Update Step). Según el libro "Edelkamp, S., & Schrödl, S. (2012). Heuristic search : theory and applications 
+    /// / Stefan Edelkamp, Stefan Schrödl. (1st edition). Morgan Kaufmann." Página 472 algoritmo 11.2.
+    /// </summary>
+    /// <param name="goalCell"></param>
+    /// <param name="espacioBusqueda"></param>
+    public void ValueUpdateStep(GridCell goalCell, HashSet<GridCell> espacioBusqueda)
     {
         List<(GridCell, float)> oldValues = new List<(GridCell, float)>();
         List<GridCell> infinitos = new List<GridCell>();
+
+        // Inicializamos heurística a infinito guardando la anterior
         foreach (GridCell cell in espacioBusqueda)
         {
-            oldValues.Add((cell, getCellHeuristicOrDefault(cell)));
+            oldValues.Add((cell, getCellHeuristicSafe(cell)));
             cell.learnedHeuristic = float.MaxValue;
             infinitos.Add(cell);
         }
@@ -89,7 +118,7 @@ public class PathfindingManager : MonoBehaviour
         {
             GridCell actual;
             float new_value;
-            (actual, new_value) = argMinMax(infinitos, oldValues, goalCell);
+            (actual, new_value) = ArgMinMax(infinitos, oldValues, goalCell);
             infinitos.Remove(actual);
             actual.learnedHeuristic = new_value;
 
@@ -101,8 +130,13 @@ public class PathfindingManager : MonoBehaviour
         }
     }
 
-    private (GridCell, float) argMinMax(List<GridCell> infinitos, List<(GridCell, float)> oldValues, GridCell goalCell)
+    private (GridCell, float) ArgMinMax(List<GridCell> infinitos, List<(GridCell, float)> oldValues, GridCell goalCell)
     {
+        // arg min_{u∈Slss | h(u) =∞} max{temp(u), min_{a∈A(u)}{w(u,a) + h(Succ(u,a))} }
+        // Calcula la heurística mínimo entre las celdas cuya heurística es actualmente infinita,
+        // la heurística de cada celda se actualiza con el máximo entre su valor anterior y el
+        // mínimo de las heurísticas de sus vecinos más el costo de llegar a ellos.
+
         float minValue = float.MaxValue;
         GridCell minCell = null;
 
@@ -110,21 +144,27 @@ public class PathfindingManager : MonoBehaviour
         {
             float oldValue = oldValues.FirstOrDefault(x => x.Item1 == cell).Item2;
 
+            // min_{a∈A(u)}{w(u,a) + h(Succ(u,a))}
+            // obtenemos vecino más barato
             float bestCost = float.MaxValue;
             grid.GetNeighbors(cell).ForEach(neighbor =>
             {
                 // Nota: En pimera parte esto no es necesario porque todos
                 // los costos son 1, pero en la segunda necesitamos calcular
                 // el costo según el terreno. Así que lo dejo.
-                float currentCost = cell.cost + getCellHeuristicOrDefault(neighbor);
+                float currentCost = cell.cost + getCellHeuristicSafe(neighbor);
                 if (currentCost < bestCost)
                 {
                     bestCost = currentCost;
                 }
             });
 
+            // Máximo entre el valor anterior y el mejor costo calculado
+            // max{ temp(u), min_{ a∈A(u)} { w(u, a) + h(Succ(u, a))} }
             float value = Mathf.Max(oldValue, bestCost);
 
+            // Mínimo entre los calculados
+            // arg min_{u∈Slss | h(u) =∞}
             if (value < minValue)
             {
                 minValue = value;
@@ -132,30 +172,26 @@ public class PathfindingManager : MonoBehaviour
             }
         }
 
+        // Devuelve tanto la celda como el valor mínimo porque o si no
+        // tendríamos que volver a calcularlo después.
         return (minCell, minValue);
     }
 
-    public GridCell GetNextStepLRTA(GridCell currentCell)
+    public GridCell GetNextStep(GridCell currentCell)
     {
-        // Si ya estamos en la meta, no nos movemos
-        //if (currentCell == goalCell) return currentCell;
+        // Argmin(u,A) = min{w(u,a) + h(Succ(u,a))}
+        // Donde A es el conjunto de acciones disponibles en el estado u, w(u,a)
+        // es el costo de la acción a desde el estado u, y h(Succ(u,a)) es la heurística
+        // del estado sucesor después de aplicar la acción a.
 
         GridCell bestNextCell = null;
         float minF = float.MaxValue;
-
-
-        // 1. EVALUAR VECINOS 
         foreach (GridCell neighbor in grid.GetNeighbors(currentCell))
         {
-            // if (neighbor.isOccupied) continue;
+            // w(u,a) + h(Succ(u,a))
+            float f = currentCell.cost + getCellHeuristicSafe(neighbor);
 
-            // Si el vecino nunca ha sido visitado/evaluado, calculamos su heurística inicial (Distancia Manhattan)
-
-            // f(vecino) = coste de ir al vecino (w) + heurística del vecino (h)
-            // Aquí usamos neighbor.cost como la 'w' de la fórmula
-            float f = currentCell.cost + getCellHeuristicOrDefault(neighbor);
-
-            // Buscamos el vecino con la f más pequeña (argmin)
+            // Con esto buscamos el f mínimo 
             if (f < minF)
             {
                 minF = f;
@@ -163,31 +199,49 @@ public class PathfindingManager : MonoBehaviour
             }
         }
 
-        // 2. APRENDIZAJE: Actualizar la heurística de la celda actual
-        getCellHeuristicOrDefault(currentCell);
-
-        // h(u) = max(h(u), f_minimo)
-        // Esto no debería estar aquí, pero si lo comento peta 
-        // currentCell.learnedHeuristic = Mathf.Max(currentCell.learnedHeuristic, minF);
-        //bestNextCell.learnedHeuristic = minF;
-
-        // 3. RETORNAR RESULTADO
         return bestNextCell;
     }
 
-    public float getCellHeuristicOrDefault(GridCell cell)
+    /// <summary>
+    /// Obtiene la heurística de una celda, si el valor está sin inicializar se calcula.
+    /// </summary>
+    /// <param name="cell">Celda de la que obtener la heurística.</param>
+    /// <returns>Heurísitca de la celda.</returns>
+    public float getCellHeuristicSafe(GridCell cell)
     {
         if (cell.learnedHeuristic < 0)
         {
-            cell.learnedHeuristic = CalculateManhattanHeuristic(cell);
+            cell.learnedHeuristic = CalculateHeuristic(cell);
         }
         // Devuelve el valor aprendido o recién calculado
         return cell.learnedHeuristic;
     }
 
-
-    // Calculamos la distancia Manhattan pura y dura
-    private float CalculateManhattanHeuristic(GridCell a)
+    /// <summary>
+    /// Calcula la heurística según el tipo seleccionado por la clase.
+    /// </summary>
+    /// <param name="a"></param>
+    /// <returns></returns>
+    private float CalculateHeuristic(GridCell a)
+    {
+        switch (heuristicType)
+        {     
+            case HeuristicType.Euclidean:
+                return CalculateEuclideanHeuristic(a);
+            case HeuristicType.Chebyshev:
+                return CalculateChebyshevHeuristic(a);
+            case HeuristicType.Manhattan:
+            default:
+                return CalculateManhattanHeuristic(a);
+        }        
+    }
+    
+    /// <summary>
+    /// Calcula la heurística según el algoritmo de Manhattan.
+    /// </summary>
+    /// <param name="current">Celda actual</param>
+    /// <returns>Heurística</returns>
+    private float CalculateManhattanHeuristic(GridCell current)
     {
         if (GoalCell == null)
         {
@@ -195,6 +249,36 @@ public class PathfindingManager : MonoBehaviour
             return float.MaxValue;
         }
 
-        return Mathf.Abs(a.gridPosition.x - GoalCell.gridPosition.x) + Mathf.Abs(a.gridPosition.y - GoalCell.gridPosition.y);
+        return Mathf.Abs(current.gridPosition.x - GoalCell.gridPosition.x) + Mathf.Abs(current.gridPosition.y - GoalCell.gridPosition.y);
+    }
+
+    /// <summary>
+    /// Calcula la heurística según la distancia euclídea.
+    /// </summary>
+    /// <param name="current">Celda actual</param>
+    /// <returns>Heurística</returns>
+    private float CalculateEuclideanHeuristic(GridCell current)
+    {
+        if (GoalCell == null)
+        {
+            Debug.LogError("GoalCell no está asignada. No se puede calcular la heurística.");
+            return float.MaxValue;
+        }
+        return Vector2Int.Distance(current.gridPosition, GoalCell.gridPosition);
+    }
+
+    /// <summary>
+    /// Calcula la heurística según la distancia de Chebyshev.
+    /// </summary>
+    /// <param name="current">Celda actual</param>
+    /// <returns>Heurística</returns>
+    private float CalculateChebyshevHeuristic(GridCell current)
+    {
+        if (GoalCell == null)
+        {
+            Debug.LogError("GoalCell no está asignada. No se puede calcular la heurística.");
+            return float.MaxValue;
+        }
+        return Mathf.Max(Mathf.Abs(current.gridPosition.x - GoalCell.gridPosition.x), Mathf.Abs(current.gridPosition.y - GoalCell.gridPosition.y));
     }
 }
