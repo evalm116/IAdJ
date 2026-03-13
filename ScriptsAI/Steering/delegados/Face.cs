@@ -6,6 +6,10 @@ public class Face : Align
 {
     public override Steering GetSteering(AgentNPC character)
     {
+        // Si no tiene target, no hace nada
+        if (target == null)
+            return new Steering();
+
         var direction = target.transform.position - character.Position;
         if (direction.magnitude == 0)
             return new Steering();

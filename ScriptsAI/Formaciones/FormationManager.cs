@@ -15,6 +15,10 @@ public class FormationManager : MonoBehaviour
     // Referencia al mapa 
     public Grid gridManager;
 
+    [Header("Ajuste de Obstáculos")]
+    public LayerMask capaObstaculos; // Para detectar las pirámides y columnas
+    public float distanciaOffsetPared = 1.5f; // Cuánto se separa el fantasma de la pared
+
     // Método para saber si un tanque ya está en esta formación
     public bool IsInFormation(AgentNPC character)
     {
@@ -161,6 +165,19 @@ public class FormationManager : MonoBehaviour
             // TransformPoint: Convierte esa coordenada local a mundo real usando
             //    la rotación y posición del Líder (este GameObject llamado "anchor")
             Vector3 targetPosition = transform.TransformPoint(relativeLoc);
+
+            // Calculamos la dirección y distancia desde el Líder hasta el hueco
+            Vector3 direccionAlTarget = targetPosition - transform.position;
+            float distanciaAlTarget = direccionAlTarget.magnitude;
+
+            // Lanzamos un rayo desde el Líder hacia el hueco. 
+            // Si se choca con un muro antes de llegar al sitio asignado...
+            if (Physics.Raycast(transform.position, direccionAlTarget.normalized, out RaycastHit hit, distanciaAlTarget, capaObstaculos))
+            {
+                // Cogemos el punto exacto donde chocó el rayo con la pared,
+                // y usamos hit.normal (que apunta hacia afuera de la pared) para aplicarle el Offset.
+                targetPosition = hit.point + (hit.normal * distanciaOffsetPared);
+            }
 
             // 4. Movemos el fantasma (Dummy) a esa coordenada real
             if (slotAssignments[i].dummyTarget != null)
