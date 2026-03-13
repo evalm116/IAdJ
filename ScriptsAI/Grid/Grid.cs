@@ -12,6 +12,9 @@ public class Grid : MonoBehaviour
 
     public GridCell[,] gridArray;
 
+    [Header("Debug")]
+    public PathfindingManager debugHeuristics;
+
     private void Awake()
     {
         gridArray = new GridCell[columnas, filas];
@@ -129,33 +132,31 @@ public class Grid : MonoBehaviour
                 else // Si es transitable dibujamos su heurística encima de la celda
                 {
                     // #if necesario para evitar errores de Handles en builds, aunque no es necesario para Gizmos
+                    if (debugHeuristics != null)
+                    {
 #if UNITY_EDITOR
-                    int learned = (int)gridArray[x, z].learnedHeuristic;
-                    string label = learned < 0f ? "-" : learned.ToString();
+                        int learned = (int)debugHeuristics.gridHeuristics[x, z];
+                        string label = learned < 0f ? "-" : learned.ToString();
 
-                    // Offset arriba para que no se solape con el suelo
-                    Vector3 labelPos = cellCenter + Vector3.up * (cellSize * 0.02f);
+                        // Offset arriba para que no se solape con el suelo
+                        Vector3 labelPos = cellCenter + Vector3.up * (cellSize * 0.02f);
 
-                    GUIStyle style = new GUIStyle();
-                    style.alignment = TextAnchor.MiddleCenter;
-                    style.normal.textColor = Color.white;
-                    style.fontSize = Mathf.Clamp((int)(cellSize * 6), 8, 16);
+                        GUIStyle style = new GUIStyle();
+                        style.alignment = TextAnchor.MiddleCenter;
+                        style.normal.textColor = Color.white;
+                        style.fontSize = Mathf.Clamp((int)(cellSize * 6), 8, 16);
 
-                    Handles.Label(labelPos, label, style);
+                        Handles.Label(labelPos, label, style);
 #endif
+                    }
                 }
             }
         }
     }
 
-    internal void ResetHeuristics()
+
+    public bool PosicionValida(Vector2Int pos)
     {
-        for (int x = 0; x < columnas; x++)
-        {
-            for (int z = 0; z < filas; z++)
-            {
-                gridArray[x, z].learnedHeuristic = -1.0f;
-            }
-        }
+        return pos.x >= 0 && pos.x < columnas && pos.y >= 0 && pos.y < filas;
     }
 }

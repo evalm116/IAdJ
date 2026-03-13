@@ -7,12 +7,14 @@ public class NPC_Pathfinder : Seek
     public PathfindingManager pathManager;
     public Grid gameGrid;
     public Transform objetivo; // El objeto al que queremos llegar 
+    private Vector2Int _celdaObjetivo;
 
     [Header("Ajustes de Movimiento")]
-    public float velocidad = 3f;
+    public int radioEspacioBusqueda = 1;
 
     // La celda a la que el NPC se está dirigiendo en este momento
     private GridCell celdaDestinoActual;
+    
 
     void Start()
     {
@@ -20,6 +22,15 @@ public class NPC_Pathfinder : Seek
         {
             GameObject dummy = new GameObject("DummyPathTarget");
             target = dummy.AddComponent<Agent>();
+        }
+        if (gameGrid != null)
+        {
+            _celdaObjetivo = gameGrid.GetGridPosition(objetivo.position);
+            if (!gameGrid.PosicionValida(_celdaObjetivo))
+            {
+                Debug.LogWarning("El Objetivo están fuera del Grid.");
+                return;
+            }
         }
         PedirSiguientePaso();
     }
@@ -33,7 +44,8 @@ public class NPC_Pathfinder : Seek
         int z = celdaDestinoActual.gridPosition.y;
         Vector3 puntoDestino = gameGrid.GetCellCenter(x, z);
 
-        if (Vector3.Distance(objetivo.position, puntoDestino) <= 0.15f)
+        Vector2Int miPosicionGrid = gameGrid.GetGridPosition(character.Position); 
+        if (miPosicionGrid == _celdaObjetivo)        
         {
             character.StopMoving();
             return new Steering(); // Ya hemos llegado al objetivo final
@@ -41,9 +53,10 @@ public class NPC_Pathfinder : Seek
 
 
         target.Position = puntoDestino;
+        //target.Position = Vector3.MoveTowards(transform.position, puntoDestino, character.MaxSpeed * Time.deltaTime); // Movemos el target suavemente hacia el punto destino
 
         // Se llega al punto destino, se pide el siguiente paso
-        if (Vector3.Distance(transform.position, puntoDestino) < 0.1f)
+        if (Vector3.Distance(target.Position, character.Position) < GetArriveDistance(character))
         {
             PedirSiguientePaso();
         }
@@ -59,7 +72,7 @@ public class NPC_Pathfinder : Seek
         Vector2Int miPosicionGrid = gameGrid.GetGridPosition(transform.position);
 
 
-        if (!PosicionValida(miPosicionGrid))
+        if (!gameGrid.PosicionValida(miPosicionGrid))
         {
             Debug.LogWarning("El NPC están fuera del Grid.");
             return;
@@ -70,24 +83,27 @@ public class NPC_Pathfinder : Seek
 
         if (pathManager.GoalCell == null)
         {
-            // B. Calculamos en qué celda (X, Z) está nuestra meta final
-            Vector2Int metaPosicionGrid = gameGrid.GetGridPosition(objetivo.position);
-
-            if (!PosicionValida(metaPosicionGrid))
+            if (!gameGrid.PosicionValida(_celdaObjetivo))
             {
                 Debug.LogWarning("El Objetivo están fuera del Grid.");
                 return;
             }
 
-            GridCell celdaMeta = gameGrid.gridArray[metaPosicionGrid.x, metaPosicionGrid.y];
+            GridCell celdaMeta = gameGrid.gridArray[_celdaObjetivo.x, _celdaObjetivo.y];
             pathManager.GoalCell = celdaMeta;
         }
-        //celdaDestinoActual = pathManager.GetNextStepLRTA(miCelda, celdaMeta);
-        celdaDestinoActual = pathManager.FindPath(miCelda, 1);
+        
+        celdaDestinoActual = pathManager.FindPath(miCelda, radioEspacioBusqueda);      
+            
     }
 
-    private bool PosicionValida(Vector2Int pos)
+    private float GetArriveDistance(AgentNPC character)
     {
-        return pos.x >= 0 && pos.x < gameGrid.columnas && pos.y >= 0 && pos.y < gameGrid.filas;
+        if (character.Velocity.magnitude > 0)
+        {
+            return 0.04f * character.Velocity.magnitude;            
+        }
+        // Si está parado devolvemos distancia fija
+        return 0.1f; 
     }
 }

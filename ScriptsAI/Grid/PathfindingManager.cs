@@ -14,6 +14,7 @@ public class PathfindingManager : MonoBehaviour
     public HeuristicType heuristicType = HeuristicType.Manhattan;
 
     public Grid grid;
+    public float[,] gridHeuristics;
     private GridCell _goalCell;
     private bool _caminoValido = true;
     public GridCell GoalCell
@@ -23,8 +24,19 @@ public class PathfindingManager : MonoBehaviour
         {
             _goalCell = value;
             // Reiniciar las heurísticas aprendidas de todas las celdas al cambiar la meta
-            grid.ResetHeuristics();
+            ResetHeuristics();
         }
+    }
+
+    private void Start()
+    {
+        if (grid == null)
+        {
+            Debug.LogError("Grid no está asignada en el PathfindingManager.");
+            return;
+        }
+        gridHeuristics = new float[grid.columnas, grid.filas];
+        ResetHeuristics();
     }
 
     /// <summary>
@@ -109,8 +121,9 @@ public class PathfindingManager : MonoBehaviour
         // Inicializamos heurística a infinito guardando la anterior
         foreach (GridCell cell in espacioBusqueda)
         {
-            oldValues.Add((cell, getCellHeuristicSafe(cell)));
-            cell.learnedHeuristic = float.MaxValue;
+            oldValues.Add((cell, GetCellHeuristicSafe(cell)));
+            gridHeuristics[cell.gridPosition.x, cell.gridPosition.y] = float.MaxValue;
+            // cell.learnedHeuristic = float.MaxValue;
             infinitos.Add(cell);
         }
 
@@ -120,9 +133,11 @@ public class PathfindingManager : MonoBehaviour
             float new_value;
             (actual, new_value) = ArgMinMax(infinitos, oldValues, goalCell);
             infinitos.Remove(actual);
-            actual.learnedHeuristic = new_value;
+            gridHeuristics[actual.gridPosition.x, actual.gridPosition.y] = new_value;
+            //actual.learnedHeuristic = new_value;
 
-            if (actual.learnedHeuristic == float.MaxValue)
+            //if (actual.learnedHeuristic == float.MaxValue)
+            if (gridHeuristics[actual.gridPosition.x, actual.gridPosition.y] == float.MaxValue)
             {
                 Debug.LogWarning("No se encontró un camino válido.");
                 return;
@@ -152,7 +167,7 @@ public class PathfindingManager : MonoBehaviour
                 // Nota: En pimera parte esto no es necesario porque todos
                 // los costos son 1, pero en la segunda necesitamos calcular
                 // el costo según el terreno. Así que lo dejo.
-                float currentCost = cell.cost + getCellHeuristicSafe(neighbor);
+                float currentCost = cell.cost + GetCellHeuristicSafe(neighbor);
                 if (currentCost < bestCost)
                 {
                     bestCost = currentCost;
@@ -177,6 +192,12 @@ public class PathfindingManager : MonoBehaviour
         return (minCell, minValue);
     }
 
+    /// <summary>
+    /// Optiene el siguiente paso a seguir desde la celda actual, elegiendo la celda vecina
+    /// con menor coste heurístico.
+    /// </summary>
+    /// <param name="currentCell">Celda actual</param>
+    /// <returns>Vecino de menor costo.</returns>
     public GridCell GetNextStep(GridCell currentCell)
     {
         // Argmin(u,A) = min{w(u,a) + h(Succ(u,a))}
@@ -189,7 +210,7 @@ public class PathfindingManager : MonoBehaviour
         foreach (GridCell neighbor in grid.GetNeighbors(currentCell))
         {
             // w(u,a) + h(Succ(u,a))
-            float f = currentCell.cost + getCellHeuristicSafe(neighbor);
+            float f = currentCell.cost + GetCellHeuristicSafe(neighbor);
 
             // Con esto buscamos el f mínimo 
             if (f < minF)
@@ -207,32 +228,33 @@ public class PathfindingManager : MonoBehaviour
     /// </summary>
     /// <param name="cell">Celda de la que obtener la heurística.</param>
     /// <returns>Heurísitca de la celda.</returns>
-    public float getCellHeuristicSafe(GridCell cell)
+    public float GetCellHeuristicSafe(GridCell cell)
     {
-        if (cell.learnedHeuristic < 0)
+        Vector2Int pos = cell.gridPosition;        
+        if (gridHeuristics[pos.x, pos.y] < 0)
         {
-            cell.learnedHeuristic = CalculateHeuristic(cell);
+            gridHeuristics[pos.x, pos.y] = CalculateHeuristic(cell);
         }
         // Devuelve el valor aprendido o recién calculado
-        return cell.learnedHeuristic;
+        return gridHeuristics[pos.x, pos.y];
     }
 
     /// <summary>
     /// Calcula la heurística según el tipo seleccionado por la clase.
     /// </summary>
-    /// <param name="a"></param>
+    /// <param name="currentCell"></param>
     /// <returns></returns>
-    private float CalculateHeuristic(GridCell a)
+    private float CalculateHeuristic(GridCell currentCell)
     {
         switch (heuristicType)
         {     
             case HeuristicType.Euclidean:
-                return CalculateEuclideanHeuristic(a);
+                return CalculateEuclideanHeuristic(currentCell);
             case HeuristicType.Chebyshev:
-                return CalculateChebyshevHeuristic(a);
+                return CalculateChebyshevHeuristic(currentCell);
             case HeuristicType.Manhattan:
             default:
-                return CalculateManhattanHeuristic(a);
+                return CalculateManhattanHeuristic(currentCell);
         }        
     }
     
@@ -280,5 +302,17 @@ public class PathfindingManager : MonoBehaviour
             return float.MaxValue;
         }
         return Mathf.Max(Mathf.Abs(current.gridPosition.x - GoalCell.gridPosition.x), Mathf.Abs(current.gridPosition.y - GoalCell.gridPosition.y));
+    }
+
+
+    private void ResetHeuristics()
+    {
+        for (int x = 0; x < gridHeuristics.GetLength(0); x++)
+        {
+            for (int z = 0; z < gridHeuristics.GetLength(1); z++)
+            {
+                gridHeuristics[x, z] = -1.0f;
+            }
+        }
     }
 }
