@@ -7,7 +7,7 @@ public class PathFollowing : Seek
     protected Path _path;
     [SerializeField] protected GameObject _pathParent;
     [SerializeField] protected float _pathOffset;
-    private float _currentParam;
+    protected float _currentParam = 0f;
 
     [SerializeField] public bool loop;
     protected bool finished;
@@ -52,8 +52,7 @@ public class PathFollowing : Seek
         }
 
         // Si existe un face, hacemos que su target sea el mismo que el de este PathFollowing
-        Face faceBehavior = GetComponent<Face>();
-        if (faceBehavior != null)
+        if (TryGetComponent<Face>(out var faceBehavior))
         {
             faceBehavior.target = this.target;
         }
@@ -81,13 +80,13 @@ public class PathFollowing : Seek
         if (loop && finished)
         {
             target.Position = _path.getFirstPosition();
-            if (Vector3.Distance(character.Position, _path.getFirstPosition()) <= 0.5f)
+            if (Vector3.Distance(character.Position, _path.getFirstPosition()) <= GetArriveDistance(character))
             {
                 finished = false;
             }
         }
 
-        if (!loop && !finished && Vector3.Distance(character.Position, _path.getLastPosition()) <= 0.5f)
+        if (!loop && !finished && Vector3.Distance(character.Position, _path.getLastPosition()) <= GetArriveDistance(character))
         {
             finished = true;
             character.StopMoving();
