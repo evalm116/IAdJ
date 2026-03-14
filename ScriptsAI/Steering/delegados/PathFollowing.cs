@@ -62,6 +62,7 @@ public class PathFollowing : Seek
     public override Steering GetSteering(AgentNPC character)
     {
         if (finished && !loop) return new Steering();
+        if (_path.TotalLength == 0 && target != null) return base.GetSteering(character);
 
         _currentParam = _path.getParam(character.Position, _currentParam);
 

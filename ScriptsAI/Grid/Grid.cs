@@ -59,6 +59,11 @@ public class Grid : MonoBehaviour
         return new Vector3(xPos, transform.position.y, zPos);
     }
 
+    public Vector3 GetCellCenter(GridCell cell)
+    {
+        return GetCellCenter(cell.gridPosition.x, cell.gridPosition.y);
+    }
+
     /// <summary>
     /// Dada una posición en el mundo 3D, obtener la posición correspondiente en el grid (x,z).
     /// </summary>

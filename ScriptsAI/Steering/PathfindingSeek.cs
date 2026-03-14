@@ -1,7 +1,7 @@
 using System.Runtime;
 using UnityEngine;
 
-public class NPC_Pathfinder : Seek
+public class PathfindingSeek : Seek
 {
     [Header("Referencias")]
     public LRTASeek pathManager;
