@@ -40,4 +40,14 @@ public class SteeringBehaviour : MonoBehaviour
         // Te puede ser util Rect() y GUI.TextField()
         // https://docs.unity3d.com/ScriptReference/GUI.TextField.html
     }
+
+    protected float GetArriveDistance(AgentNPC character)
+    {
+        if (character.Velocity.magnitude > 0)
+        {
+            return 0.04f * character.Velocity.magnitude;
+        }
+        // Si está parado devolvemos distancia fija
+        return 0.1f;
+    }
 }

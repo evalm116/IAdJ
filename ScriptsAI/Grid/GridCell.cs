@@ -10,7 +10,6 @@ public class GridCell
 
     public bool isWalkable;
 
-    public float learnedHeuristic;
 
     // Constructor
     public GridCell(Vector2Int pos)
@@ -20,8 +19,5 @@ public class GridCell
         isWalkable = true; // Por defecto asumimos que el suelo está libre
         occupant = null;
         cost = 1f;
-
-        // Inicializamos la heurística en -1 para saber que aún no se ha calculado nunca
-        learnedHeuristic = -1f;
     }
 }

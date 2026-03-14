@@ -1,8 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Path : MonoBehaviour
+public class Path
 {
     [SerializeField] protected List<Vector3> _pathNodes;
     [SerializeField] protected List<float> _cummulativeLength;
@@ -17,6 +18,11 @@ public class Path : MonoBehaviour
     public float TotalLength
     {
         get { return _totalLength; }
+    }
+
+    public Path()
+    {
+        ResetNodes();
     }
 
     private void SetUpCummulative()
@@ -112,5 +118,27 @@ public class Path : MonoBehaviour
     {
         if (_pathNodes == null || _pathNodes.Count == 0) return Vector3.zero;
         return _pathNodes[0];
+    }
+
+    public void AddNode(Vector3 node)
+    {
+        _pathNodes.Add(node);
+        if (_pathNodes.Count > 1) { 
+            int index = _pathNodes.Count - 2;
+            float segmentLength = Vector3.Distance(_pathNodes[index], _pathNodes[index + 1]);
+            _totalLength += segmentLength;
+            _cummulativeLength.Add(_totalLength);
+        }
+    }
+
+    internal void ResetNodes()
+    {
+        _pathNodes = new List<Vector3>();
+        _cummulativeLength = new List<float>();
+        _totalLength = 0f;
+    }
+
+    public float GetLength() {
+        return _totalLength;
     }
 }

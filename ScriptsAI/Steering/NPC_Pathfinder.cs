@@ -4,15 +4,17 @@ using UnityEngine;
 public class NPC_Pathfinder : Seek
 {
     [Header("Referencias")]
-    public PathfindingManager pathManager;
+    public LRTASeek pathManager;
     public Grid gameGrid;
     public Transform objetivo; // El objeto al que queremos llegar 
+    private Vector2Int _celdaObjetivo;
 
     [Header("Ajustes de Movimiento")]
-    public float velocidad = 3f;
+    public int radioEspacioBusqueda = 1;
 
     // La celda a la que el NPC se está dirigiendo en este momento
     private GridCell celdaDestinoActual;
+    
 
     void Start()
     {
@@ -20,6 +22,15 @@ public class NPC_Pathfinder : Seek
         {
             GameObject dummy = new GameObject("DummyPathTarget");
             target = dummy.AddComponent<Agent>();
+        }
+        if (gameGrid != null)
+        {
+            _celdaObjetivo = gameGrid.GetGridPosition(objetivo.position);
+            if (!gameGrid.PosicionValida(_celdaObjetivo))
+            {
+                Debug.LogWarning("El Objetivo están fuera del Grid.");
+                return;
+            }
         }
         PedirSiguientePaso();
     }
@@ -29,18 +40,24 @@ public class NPC_Pathfinder : Seek
         // Si no tenemos objetivo o celda a la que ir, no hacemos nada
         if (objetivo == null || celdaDestinoActual == null) return new Steering();
 
-        // 1. Obtenemos la posición física (Vector3) del centro de la celda a la que vamos
         int x = celdaDestinoActual.gridPosition.x;
         int z = celdaDestinoActual.gridPosition.y;
         Vector3 puntoDestino = gameGrid.GetCellCenter(x, z);
 
-        // 2. STEERING BÁSICO (Seek): Nos movemos hacia ese punto
-        target.Position = Vector3.MoveTowards(transform.position, puntoDestino, velocidad * Time.deltaTime);
-
-        // 3. COMPROBACIÓN DE LLEGADA
-        if (Vector3.Distance(transform.position, puntoDestino) < 0.1f)
+        Vector2Int miPosicionGrid = gameGrid.GetGridPosition(character.Position); 
+        if (miPosicionGrid == _celdaObjetivo)        
         {
-            // Hemos llegado a la casilla, ¡toca pensar el siguiente paso!
+            character.StopMoving();
+            return new Steering(); // Ya hemos llegado al objetivo final
+        }
+
+
+        target.Position = puntoDestino;
+        //target.Position = Vector3.MoveTowards(transform.position, puntoDestino, character.MaxSpeed * Time.deltaTime); // Movemos el target suavemente hacia el punto destino
+
+        // Se llega al punto destino, se pide el siguiente paso
+        if (Vector3.Distance(target.Position, character.Position) < GetArriveDistance(character))
+        {
             PedirSiguientePaso();
         }
 
@@ -54,25 +71,29 @@ public class NPC_Pathfinder : Seek
         // A. Calculamos en qué celda (X, Z) estamos nosotros ahora mismo
         Vector2Int miPosicionGrid = gameGrid.GetGridPosition(transform.position);
 
-        // B. Calculamos en qué celda (X, Z) está nuestra meta final
-        Vector2Int metaPosicionGrid = gameGrid.GetGridPosition(objetivo.position);
 
-        // OJO: Nos aseguramos de no salirnos de los límites del array
-        if (!PosicionValida(miPosicionGrid) || !PosicionValida(metaPosicionGrid))
+        if (!gameGrid.PosicionValida(miPosicionGrid))
         {
-            Debug.LogWarning("El NPC o el Objetivo están fuera del Grid.");
+            Debug.LogWarning("El NPC están fuera del Grid.");
             return;
         }
 
         // C. Cogemos las celdas reales del array
         GridCell miCelda = gameGrid.gridArray[miPosicionGrid.x, miPosicionGrid.y];
-        GridCell celdaMeta = gameGrid.gridArray[metaPosicionGrid.x, metaPosicionGrid.y];
 
-        celdaDestinoActual = pathManager.GetNextStepLRTA(miCelda, celdaMeta);
-    }
+        if (pathManager.GoalCell == null)
+        {
+            if (!gameGrid.PosicionValida(_celdaObjetivo))
+            {
+                Debug.LogWarning("El Objetivo están fuera del Grid.");
+                return;
+            }
 
-    private bool PosicionValida(Vector2Int pos)
-    {
-        return pos.x >= 0 && pos.x < gameGrid.columnas && pos.y >= 0 && pos.y < gameGrid.filas;
+            GridCell celdaMeta = gameGrid.gridArray[_celdaObjetivo.x, _celdaObjetivo.y];
+            pathManager.GoalCell = celdaMeta;
+        }
+        
+        celdaDestinoActual = pathManager.FindPath(miCelda, radioEspacioBusqueda);      
+            
     }
 }
