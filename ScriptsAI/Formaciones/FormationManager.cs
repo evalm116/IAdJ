@@ -18,11 +18,11 @@ public class FormationManager : MonoBehaviour
     private float tiempoMoviendose = 0f;
     private bool enFormacion = true; 
 
-    // --- VARIABLES DEL LÍDER (WANDER Y MANUAL) ---
+    // --- VARIABLES DEL LÍDER ---
     [Header("Tiempos del Líder")]
     public float tiempoCaminandoWander = 5f; 
-    public float tiempoParadoWander = 5f; 
-    public float tiempoInactivoParaWander = 5f; 
+    public float tiempoParadoWander = 20f; 
+    public float tiempoInactivoParaWander = 20f; 
 
     private float cronometroWander = 0f;
     private bool liderDePaseo = true;
@@ -35,6 +35,11 @@ public class FormationManager : MonoBehaviour
     private Arrive arriveLider;
     private Face faceLider;
     private Agent destinoOriginal;
+
+    // NUEVO: Variable para controlar a los muros de forma limpia
+    // IMPORTANTE: Si tu script de muros se llama distinto, cambia este nombre
+    private WallAvoidanceThreeRays wallAvoidanceLider;
+    private float pesoOriginalMuros = 10f;
 
 
     // =========================================================
@@ -123,7 +128,6 @@ public class FormationManager : MonoBehaviour
         return false; 
     }
 
-
     // =========================================================
     // START Y UPDATE (LA LÓGICA DE MOVIMIENTO)
     // =========================================================
@@ -133,8 +137,8 @@ public class FormationManager : MonoBehaviour
 
         agenteLider = GetComponent<AgentNPC>();
         arriveLider = GetComponent<Arrive>();
+        wallAvoidanceLider = GetComponent<WallAvoidanceThreeRays>(); // Buscamos el script de muros
 
-        // Filtramos exactamente qué script es Face puro y cuál es Wander
         Face[] todosLosFaces = GetComponents<Face>();
         foreach (Face f in todosLosFaces)
         {
@@ -150,10 +154,12 @@ public class FormationManager : MonoBehaviour
             slotAssignments.Add(leaderSlot);
         }
 
-        // Guardamos el Destino original del clic
         if (arriveLider != null) destinoOriginal = arriveLider.target;
+        if (wallAvoidanceLider != null) pesoOriginalMuros = wallAvoidanceLider.weight;
 
-        // Empezamos forzando el modo Wander
+        // El AgentNPC se queda siempre encendido (Buena Práctica)
+        if (agenteLider != null) agenteLider.enabled = true;
+
         ApagarManual();
         if (wanderLider != null) wanderLider.isWandering = true;
     }
@@ -170,7 +176,9 @@ public class FormationManager : MonoBehaviour
             modoManual = true;
             cronometroManual = 0f; 
             
-            // Apagamos el interruptor del Wander y activamos el ratón
+            // Le devolvemos el instinto de esquivar muros por si estaba apagado
+            if (wallAvoidanceLider != null) wallAvoidanceLider.weight = pesoOriginalMuros;
+
             if (wanderLider != null) wanderLider.isWandering = false;
             ActivarManual();
         }
@@ -184,18 +192,26 @@ public class FormationManager : MonoBehaviour
             {
                 float distanciaAlDestino = Vector3.Distance(transform.position, arriveLider.target.Position);
 
-                // Si ha llegado a la marca del ratón
                 if (distanciaAlDestino < 1.0f) 
                 {
+                    // Ha llegado a la marca: Mantenemos velocidad a cero y APAGAMOS LOS MUROS temporalmente
+                    if (agenteLider != null)
+                    {
+                        agenteLider.Velocity = Vector3.zero;
+                        agenteLider.Rotation = 0f;
+                    }
+                    if (wallAvoidanceLider != null) wallAvoidanceLider.weight = 0f;
+
                     cronometroManual += Time.deltaTime;
                     
-                    // Si pasan 5 segundos quieto... vuelve el Wander
                     if (cronometroManual >= tiempoInactivoParaWander)
                     {
                         modoManual = false;
                         liderDePaseo = true; 
                         cronometroWander = 0f;
 
+                        // Toca volver al Wander: Le devolvemos el instinto de los muros
+                        if (wallAvoidanceLider != null) wallAvoidanceLider.weight = pesoOriginalMuros;
                         ApagarManual();
                         if (wanderLider != null) wanderLider.isWandering = true;
                     }
@@ -208,34 +224,53 @@ public class FormationManager : MonoBehaviour
         }
         else
         {
-            // --- MODO DEMO AUTOMÁTICA (Alterna entre Wander 5s y Parado 5s) ---
+            // --- MODO DEMO AUTOMÁTICA ---
             cronometroWander += Time.deltaTime;
 
-            if (liderDePaseo && cronometroWander >= tiempoCaminandoWander)
+            if (liderDePaseo)
             {
-                // Toca pararse: Apagamos el interruptor del Wander
-                if (wanderLider != null) wanderLider.isWandering = false;
+                if (cronometroWander >= tiempoCaminandoWander)
+                {
+                    if (wanderLider != null) wanderLider.isWandering = false;
 
-                agenteLider.Velocity = Vector3.zero; 
-                agenteLider.Rotation = 0f; 
-                
-                liderDePaseo = false;
-                cronometroWander = 0f;
+                    // Toca pararse: Clavamos frenos y APAGAMOS LOS MUROS temporalmente
+                    if (agenteLider != null)
+                    {
+                        agenteLider.Velocity = Vector3.zero; 
+                        agenteLider.Rotation = 0f; 
+                    }
+                    if (wallAvoidanceLider != null) wallAvoidanceLider.weight = 0f;
+                    
+                    liderDePaseo = false;
+                    cronometroWander = 0f;
+                }
             }
-            else if (!liderDePaseo && cronometroWander >= tiempoParadoWander)
+            else
             {
-                // Toca caminar: Encendemos el interruptor
-                if (wanderLider != null) wanderLider.isWandering = true;
-                
-                liderDePaseo = true;
-                cronometroWander = 0f;
+                // Mantenemos los frenos pisados durante todo el descanso
+                if (agenteLider != null)
+                {
+                    agenteLider.Velocity = Vector3.zero; 
+                    agenteLider.Rotation = 0f; 
+                }
+
+                if (cronometroWander >= tiempoParadoWander)
+                {
+                    if (wanderLider != null) wanderLider.isWandering = true;
+                    
+                    // Toca caminar: LE DEVOLVEMOS EL INSTINTO DE ESQUIVAR MUROS
+                    if (wallAvoidanceLider != null) wallAvoidanceLider.weight = pesoOriginalMuros;
+                    
+                    liderDePaseo = true;
+                    cronometroWander = 0f;
+                }
             }
         }
 
         // --------------------------------------------------------
         // 3. LÓGICA DE LA FORMACIÓN (Los soldados le siguen)
         // --------------------------------------------------------
-        float velocidadLider = agenteLider.Velocity.magnitude;
+        float velocidadLider = (agenteLider != null) ? agenteLider.Velocity.magnitude : 0f;
 
         if (velocidadLider > 0.1f)
         {
@@ -298,14 +333,12 @@ public class FormationManager : MonoBehaviour
     // =========================================================
     private void ActivarManual()
     {
-        // Les damos el "Destino" y les damos fuerza (Weight 1)
         if (arriveLider != null) { arriveLider.enabled = true; arriveLider.weight = 1f; arriveLider.target = destinoOriginal; }
         if (faceLider != null) { faceLider.enabled = true; faceLider.weight = 1f; faceLider.target = destinoOriginal; }
     }
 
     private void ApagarManual()
     {
-        // Les robamos el Target y los matamos a Weight 0
         if (arriveLider != null) { arriveLider.enabled = false; arriveLider.weight = 0f; arriveLider.target = null; }
         if (faceLider != null) { faceLider.enabled = false; faceLider.weight = 0f; faceLider.target = null; }
     }
