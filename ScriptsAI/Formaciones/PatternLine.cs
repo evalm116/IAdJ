@@ -5,9 +5,16 @@ public class PatternLine : FormationPattern
 {
     public float separation = 2f; // Distancia entre soldados
 
-    public override Vector3 GetSlotLocation(int slotNumber)
+    public override SlotTransform GetSlotLocation(int slotNumber)
     {
-        if (slotNumber == 0) return Vector3.zero; // El líder va en el centro
+        SlotTransform slotInfo = new SlotTransform();
+
+        if (slotNumber == 0) 
+        {
+            slotInfo.position = Vector3.zero; // El líder va en el centro
+            slotInfo.orientation = 0f;
+            return slotInfo;
+        }
 
         // Calculamos la posición X
         float xPos = ((slotNumber + 1) / 2) * separation;
@@ -15,7 +22,9 @@ public class PatternLine : FormationPattern
         // Si el número es par, lo ponemos a la izquierda (negativo)
         if (slotNumber % 2 == 0) xPos = -xPos; 
 
-        return new Vector3(xPos, 0, 0); 
+        slotInfo.position = new Vector3(xPos, 0, 0);
+        slotInfo.orientation = 0f; // Todos miran hacia adelante
+        return slotInfo;
     }
 
     public override Vector3 GetDriftOffset(List<SlotAssignment> slotAssignments)
@@ -25,7 +34,7 @@ public class PatternLine : FormationPattern
         Vector3 center = Vector3.zero;
         foreach (SlotAssignment slot in slotAssignments)
         {
-            center += GetSlotLocation(slot.slotNumber);
+            center += GetSlotLocation(slot.slotNumber).position;
         }
         return center / slotAssignments.Count; // Media de las posiciones
     }

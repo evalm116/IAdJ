@@ -3,23 +3,43 @@ using UnityEngine;
 
 public class FormationManager : MonoBehaviour
 {
-    // Lista de soldados y los huecos que ocupan
+    // --- VARIABLES DE LA FORMACIÓN ---
     public List<SlotAssignment> slotAssignments = new List<SlotAssignment>();
-    
-    // El desfase del centro de masas (para evitar derrapar)
     private Vector3 driftOffset;
-    
-    // El patrón que estamos usando (Línea, V, etc.)
     public FormationPattern pattern;
+    public LayerMask capaObstaculos; 
+    public float distanciaOffsetPared = 1.5f; 
 
-    // Referencia al mapa 
-    public Grid gridManager;
+    [Header("Tiempos de Formación")]
+    public float tiempoParaFormar = 0.8f; 
+    public float tiempoParaRomper = 0.5f; 
 
-    [Header("Ajuste de Obstáculos")]
-    public LayerMask capaObstaculos; // Para detectar las pirámides y columnas
-    public float distanciaOffsetPared = 1.5f; // Cuánto se separa el fantasma de la pared
+    private float tiempoQuieto = 0f;
+    private float tiempoMoviendose = 0f;
+    private bool enFormacion = true; 
 
-    // Método para saber si un tanque ya está en esta formación
+    // --- VARIABLES DEL LÍDER (WANDER Y MANUAL) ---
+    [Header("Tiempos del Líder")]
+    public float tiempoCaminandoWander = 5f; 
+    public float tiempoParadoWander = 5f; 
+    public float tiempoInactivoParaWander = 5f; 
+
+    private float cronometroWander = 0f;
+    private bool liderDePaseo = true;
+    
+    private bool modoManual = false; 
+    private float cronometroManual = 0f;
+
+    private AgentNPC agenteLider;
+    private Wander wanderLider;
+    private Arrive arriveLider;
+    private Face faceLider;
+    private Agent destinoOriginal;
+
+
+    // =========================================================
+    // FUNCIONES BÁSICAS DE GESTIÓN DE LA FORMACIÓN
+    // =========================================================
     public bool IsInFormation(AgentNPC character)
     {
         foreach (SlotAssignment slot in slotAssignments)
@@ -29,98 +49,68 @@ public class FormationManager : MonoBehaviour
         return false;
     }
 
-
     private void UpdateSlotAssignments()
     {
         for (int i = 0; i < slotAssignments.Count; i++)
         {
-
             SlotAssignment temp = slotAssignments[i];
             temp.slotNumber = i; 
             slotAssignments[i] = temp; 
         }
 
-        // Actualizamos el drift
-        if (pattern != null)
-        {
-            driftOffset = pattern.GetDriftOffset(slotAssignments);
-        }
+        if (pattern != null) driftOffset = pattern.GetDriftOffset(slotAssignments);
     }
 
     public bool AddCharacter(AgentNPC character)
     {
         int occupiedSlots = slotAssignments.Count;
 
-        // Comprobamos si en esta formación cabe uno más
         if (pattern != null && pattern.SupportsSlots(occupiedSlots + 1))
         {
-            // Creamos el nuevo assignment y lo metemos en la lista
             SlotAssignment newAssignment = new SlotAssignment();
             newAssignment.character = character;
 
-            // gestión del dummy target
             GameObject tempObj = new GameObject("Dummy_Formacion_" + character.name);
             Agent dummy = tempObj.AddComponent<Agent>();
             newAssignment.dummyTarget = dummy;
 
-            // Buscamos el Arrive del soldado, le asignamos el fantasma y lo encendemos para no crear y destruir componentes cada vez que entran o salen de la formación
             Arrive arriveScript = character.GetComponent<Arrive>();
-            if (arriveScript != null) {
-                arriveScript.target = dummy;
-                arriveScript.enabled = true; 
-            }
-            // le asignamos el fantasma al Face para que mire hacia él mientras está en formación
+            if (arriveScript != null) { arriveScript.target = dummy; arriveScript.enabled = true; }
+            
             Face faceScript = character.GetComponent<Face>();
-            if (faceScript != null)
+            if (faceScript != null) { faceScript.target = dummy; faceScript.enabled = true; }
+
+            foreach (Align a in character.GetComponents<Align>())
             {
-                faceScript.target = dummy;
-                faceScript.enabled = true;
+                if (a.GetType() == typeof(Align)) { a.target = dummy; a.enabled = false; }
             }
 
             slotAssignments.Add(newAssignment);
-            
-            // Recalculamos los números de hueco de todos
             UpdateSlotAssignments();
             return true;
         }
-        return false; // No cabe o no hay patrón
+        return false; 
     }
-
 
     public bool RemoveCharacter(AgentNPC character)
     {
-        // 1. Buscamos en qué hueco está este personaje
+        if (character == this.GetComponent<AgentNPC>()) return false;
+
         int indexToRemove = -1;     
         for (int i = 0; i < slotAssignments.Count; i++)
         {
-            if (slotAssignments[i].character == character)
-            {
-                indexToRemove = i;
-                break; 
-            }
+            if (slotAssignments[i].character == character) { indexToRemove = i; break; }
         }
-        // si lo encontramos, lo quitamos y actualizamos los huecos de los demás
+        
         if (indexToRemove != -1)
         {
-            // gestion del Arrive y el dummy target al salir de la formación
             AgentNPC npcToLeave = slotAssignments[indexToRemove].character;
             Arrive arriveScript = npcToLeave.GetComponent<Arrive>();
+            if (arriveScript != null) { arriveScript.target = null; arriveScript.enabled = false; }
             
-            // Apagamos el Arrive y le quitamos el target
-            if (arriveScript != null)
-            {
-                arriveScript.target = null;
-                arriveScript.enabled = false; 
-            }
-            // Apagamos el Face y le quitamos el target
             Face faceScript = npcToLeave.GetComponent<Face>();
-            if (faceScript != null)
-            {
-                faceScript.target = null;
-                faceScript.enabled = false;
-            }
+            if (faceScript != null) { faceScript.target = null; faceScript.enabled = false; }
 
-            // Destruimos el fantasma para no dejar basura en la escena
             if (slotAssignments[indexToRemove].dummyTarget != null)
             {
                 Destroy(slotAssignments[indexToRemove].dummyTarget.gameObject);
@@ -128,82 +118,195 @@ public class FormationManager : MonoBehaviour
             
             slotAssignments.RemoveAt(indexToRemove); 
             UpdateSlotAssignments(); 
-
             return true; 
         }
         return false; 
     }
 
+
+    // =========================================================
+    // START Y UPDATE (LA LÓGICA DE MOVIMIENTO)
+    // =========================================================
     void Start()
     {
-        pattern = new PatternV(); 
+        pattern = new PatternMediaLuna(); 
 
-        // lider el hueco 0, el resto se asigna al añadirlos a la formación
-        AgentNPC miPropioNPC = GetComponent<AgentNPC>();
-        if (miPropioNPC != null)
+        agenteLider = GetComponent<AgentNPC>();
+        arriveLider = GetComponent<Arrive>();
+
+        // Filtramos exactamente qué script es Face puro y cuál es Wander
+        Face[] todosLosFaces = GetComponents<Face>();
+        foreach (Face f in todosLosFaces)
+        {
+            if (f.GetType() == typeof(Face)) faceLider = f;
+            if (f.GetType() == typeof(Wander)) wanderLider = (Wander)f;
+        }
+
+        if (agenteLider != null)
         {
             SlotAssignment leaderSlot = new SlotAssignment();
-            leaderSlot.character = miPropioNPC;
+            leaderSlot.character = agenteLider;
             leaderSlot.slotNumber = 0;
-            // Al líder NO le creamos dummyTarget, porque él no persigue a nadie de la formación.
             slotAssignments.Add(leaderSlot);
         }
-    }
 
+        // Guardamos el Destino original del clic
+        if (arriveLider != null) destinoOriginal = arriveLider.target;
+
+        // Empezamos forzando el modo Wander
+        ApagarManual();
+        if (wanderLider != null) wanderLider.isWandering = true;
+    }
 
     void Update()
     {
-        // Si no hay patrón, no hacemos matemáticas
         if (pattern == null) return;
 
-        // Recorremos cada soldado en la formación
-        for (int i = 0; i < slotAssignments.Count; i++)
+        // --------------------------------------------------------
+        // 1. INTERRUPCIÓN MANUAL (Clic Derecho)
+        // --------------------------------------------------------
+        if (Input.GetMouseButtonDown(1)) 
         {
-            // Pedimos la posición local al patrón
-            Vector3 relativeLoc = pattern.GetSlotLocation(slotAssignments[i].slotNumber);
+            modoManual = true;
+            cronometroManual = 0f; 
+            
+            // Apagamos el interruptor del Wander y activamos el ratón
+            if (wanderLider != null) wanderLider.isWandering = false;
+            ActivarManual();
+        }
 
-            // TransformPoint: Convierte esa coordenada local a mundo real usando
-            //    la rotación y posición del Líder (este GameObject llamado "anchor")
-            Vector3 targetPosition = transform.TransformPoint(relativeLoc);
-
-            // Calculamos la dirección y distancia desde el Líder hasta el hueco
-            Vector3 direccionAlTarget = targetPosition - transform.position;
-            float distanciaAlTarget = direccionAlTarget.magnitude;
-
-            // Lanzamos un rayo desde el Líder hacia el hueco. 
-            // Si se choca con un muro antes de llegar al sitio asignado...
-            if (Physics.Raycast(transform.position, direccionAlTarget.normalized, out RaycastHit hit, distanciaAlTarget, capaObstaculos))
+        // --------------------------------------------------------
+        // 2. CONTROL DEL MOVIMIENTO DEL LÍDER
+        // --------------------------------------------------------
+        if (modoManual)
+        {
+            if (arriveLider != null && arriveLider.target != null)
             {
-                // Cogemos el punto exacto donde chocó el rayo con la pared,
-                // y usamos hit.normal (que apunta hacia afuera de la pared) para aplicarle el Offset.
-                targetPosition = hit.point + (hit.normal * distanciaOffsetPared);
-            }
+                float distanciaAlDestino = Vector3.Distance(transform.position, arriveLider.target.Position);
 
-            // 4. Movemos el fantasma (Dummy) a esa coordenada real
-            if (slotAssignments[i].dummyTarget != null)
-            {
-                slotAssignments[i].dummyTarget.Position = targetPosition;
-            }
-
-            // CONEXIÓN CON EL GRID 
-            if (gridManager != null)
-            {
-                // Usamos el método para saber qué casilla es (X, Z)
-                Vector2Int posGrid = gridManager.GetGridPosition(targetPosition);
-
-                //Comprobamos que la coordenada está dentro de los límites del mapa 
-                if (posGrid.x >= 0 && posGrid.x < gridManager.columnas && 
-                    posGrid.y >= 0 && posGrid.y < gridManager.filas)
+                // Si ha llegado a la marca del ratón
+                if (distanciaAlDestino < 1.0f) 
                 {
-                    // Obtenemos esa celda exacta de la matriz
-                    GridCell celda = gridManager.gridArray[posGrid.x, posGrid.y];
+                    cronometroManual += Time.deltaTime;
                     
-                    // Asignar el NPC a la celda
-                    celda.isOccupied = true;
-                    celda.occupant = slotAssignments[i].character.gameObject;
+                    // Si pasan 5 segundos quieto... vuelve el Wander
+                    if (cronometroManual >= tiempoInactivoParaWander)
+                    {
+                        modoManual = false;
+                        liderDePaseo = true; 
+                        cronometroWander = 0f;
+
+                        ApagarManual();
+                        if (wanderLider != null) wanderLider.isWandering = true;
+                    }
+                }
+                else
+                {
+                    cronometroManual = 0f; 
                 }
             }
-
         }
+        else
+        {
+            // --- MODO DEMO AUTOMÁTICA (Alterna entre Wander 5s y Parado 5s) ---
+            cronometroWander += Time.deltaTime;
+
+            if (liderDePaseo && cronometroWander >= tiempoCaminandoWander)
+            {
+                // Toca pararse: Apagamos el interruptor del Wander
+                if (wanderLider != null) wanderLider.isWandering = false;
+
+                agenteLider.Velocity = Vector3.zero; 
+                agenteLider.Rotation = 0f; 
+                
+                liderDePaseo = false;
+                cronometroWander = 0f;
+            }
+            else if (!liderDePaseo && cronometroWander >= tiempoParadoWander)
+            {
+                // Toca caminar: Encendemos el interruptor
+                if (wanderLider != null) wanderLider.isWandering = true;
+                
+                liderDePaseo = true;
+                cronometroWander = 0f;
+            }
+        }
+
+        // --------------------------------------------------------
+        // 3. LÓGICA DE LA FORMACIÓN (Los soldados le siguen)
+        // --------------------------------------------------------
+        float velocidadLider = agenteLider.Velocity.magnitude;
+
+        if (velocidadLider > 0.1f)
+        {
+            tiempoQuieto = 0f; 
+            tiempoMoviendose += Time.deltaTime; 
+
+            if (tiempoMoviendose >= tiempoParaRomper) enFormacion = false; 
+        }
+        else
+        {
+            tiempoMoviendose = 0f; 
+            tiempoQuieto += Time.deltaTime;
+
+            if (tiempoQuieto >= tiempoParaFormar) enFormacion = true; 
+        }
+
+        if (enFormacion)
+        {
+            for (int i = 0; i < slotAssignments.Count; i++)
+            {
+                if (slotAssignments[i].dummyTarget == null) continue;
+
+                SlotTransform slotData = pattern.GetSlotLocation(slotAssignments[i].slotNumber);
+                Vector3 relativeLoc = slotData.position;
+                
+                float orientacionFinal = slotData.orientation + transform.eulerAngles.y;
+                slotAssignments[i].dummyTarget.Orientation = orientacionFinal;
+                slotAssignments[i].dummyTarget.transform.rotation = Quaternion.Euler(0, orientacionFinal, 0);
+
+                Vector3 targetPosition = transform.TransformPoint(relativeLoc);
+                Vector3 direccionAlTarget = targetPosition - transform.position;
+                float distanciaAlTarget = direccionAlTarget.magnitude;
+
+                if (Physics.Raycast(transform.position, direccionAlTarget.normalized, out RaycastHit hit, distanciaAlTarget, capaObstaculos))
+                {
+                    targetPosition = hit.point + (hit.normal * distanciaOffsetPared);
+                }
+
+                slotAssignments[i].dummyTarget.Position = targetPosition;
+                slotAssignments[i].dummyTarget.transform.position = targetPosition;
+            }
+        }
+        else
+        {
+            Vector3 puntoPeloton = transform.position - (transform.forward * 2f);
+
+            for (int i = 0; i < slotAssignments.Count; i++)
+            {
+                if (slotAssignments[i].dummyTarget == null) continue;
+
+                slotAssignments[i].dummyTarget.Position = puntoPeloton;
+                slotAssignments[i].dummyTarget.transform.position = puntoPeloton;
+                slotAssignments[i].dummyTarget.Orientation = transform.eulerAngles.y;
+            }
+        }
+    }
+
+    // =========================================================
+    // FUNCIONES DE CONTROL MANUAL
+    // =========================================================
+    private void ActivarManual()
+    {
+        // Les damos el "Destino" y les damos fuerza (Weight 1)
+        if (arriveLider != null) { arriveLider.enabled = true; arriveLider.weight = 1f; arriveLider.target = destinoOriginal; }
+        if (faceLider != null) { faceLider.enabled = true; faceLider.weight = 1f; faceLider.target = destinoOriginal; }
+    }
+
+    private void ApagarManual()
+    {
+        // Les robamos el Target y los matamos a Weight 0
+        if (arriveLider != null) { arriveLider.enabled = false; arriveLider.weight = 0f; arriveLider.target = null; }
+        if (faceLider != null) { faceLider.enabled = false; faceLider.weight = 0f; faceLider.target = null; }
     }
 }

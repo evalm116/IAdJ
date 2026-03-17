@@ -15,7 +15,9 @@ public class Wander : Face
     // GUARDAMOS LA POSICIÓN LOCAL DEL PUNTO EN EL CÍRCULO
     private Vector3 targetLocalPosition;
 
-    void Start()
+    public bool isWandering = true; // Interruptor para activar/desactivar el Wander 
+    
+    void Awake()
     {
         this.nameSteering = "Wander";
 
@@ -35,6 +37,15 @@ public class Wander : Face
 
     public override Steering GetSteering(AgentNPC character)
     {
+        // Si el interruptor está apagado, devolvemos 0 fuerza
+        if (!isWandering || wanderTarget == null) 
+        {
+            Steering stopSteer = new Steering();
+            stopSteer.linear = Vector3.zero;
+            stopSteer.angular = 0f;
+            return stopSteer;
+        }
+
         // 1. MOVER EL PUNTO ALEATORIAMENTE (Jitter)
         // Le sumamos un vector aleatorio 3D pequeño cada frame
         targetLocalPosition += new Vector3(
