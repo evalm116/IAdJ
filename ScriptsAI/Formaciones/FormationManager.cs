@@ -8,7 +8,7 @@ public class FormationManager : MonoBehaviour
     private Vector3 driftOffset;
     public FormationPattern pattern;
     public LayerMask capaObstaculos; 
-    public float distanciaOffsetPared = 1.5f; 
+    public float distanciaOffsetPared = 2f; 
 
     [Header("Tiempos de Formación")]
     public float tiempoParaFormar = 0.8f; 
@@ -306,7 +306,22 @@ public class FormationManager : MonoBehaviour
 
                 if (Physics.Raycast(transform.position, direccionAlTarget.normalized, out RaycastHit hit, distanciaAlTarget, capaObstaculos))
                 {
+                    // empujamos hacia afuera de la pared
                     targetPosition = hit.point + (hit.normal * distanciaOffsetPared);
+
+                    // Si el líder está justo al otro lado de la pared, no queremos empujar al soldado contra el líder, así que comprobamos la distancia al líder
+                    float distanciaAlLider = Vector3.Distance(transform.position, targetPosition);
+                    float radioSeguridadLider = 2.0f; // 2 metros de espacio personal intocable
+
+                    // Si al empujarlo del muro, se nos ha quedado muy pegado al líder
+                    if (distanciaAlLider < radioSeguridadLider)
+                    {
+                        // Calculamos la dirección desde el líder hacia el soldado
+                        Vector3 direccionDesdeLider = (targetPosition - transform.position).normalized;
+                        
+                        // Lo mantenemos exactamente en el borde de la burbuja de seguridad
+                        targetPosition = transform.position + (direccionDesdeLider * radioSeguridadLider);
+                    }
                 }
 
                 slotAssignments[i].dummyTarget.Position = targetPosition;
