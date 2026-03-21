@@ -13,7 +13,7 @@ public class Grid : MonoBehaviour
     public GridCell[,] gridArray;
 
     [Header("Debug")]
-    public LRTAStar debugHeuristics;
+    public PathFindingAlgorithm debugHeuristics;
 
     private void Awake()
     {

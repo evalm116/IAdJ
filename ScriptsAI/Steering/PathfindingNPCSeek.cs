@@ -1,7 +1,7 @@
 using System.Runtime;
 using UnityEngine;
 
-public class PathfindingSeek : Seek
+public class PathfindingNPCSeek : Seek
 {
     [Header("Referencias")]
     public LRTASeek pathManager;

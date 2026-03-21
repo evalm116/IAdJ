@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PathFindingFollow : PathFollowing
+public class PathFindingNPCFollow : PathFollowing
 {
     public Transform _objective;
     public Grid gameGrid;
