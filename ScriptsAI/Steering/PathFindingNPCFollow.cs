@@ -54,11 +54,12 @@ public class PathFindingNPCFollow : PathFollowing
         SetUpObjective();   
     }
 
-    private void SetUpObjective()
+    public void SetUpObjective()
     {
         if (_pathManager == null) _pathManager = GetComponent<LRTAStar>();
         if (_pathManager.grid == null) _pathManager.grid = gameGrid;
-        if (gameGrid.PosicionValida((int) _objective.position.x, (int)_objective.position.z))
+        var objectiveCell = gameGrid.GetGridPosition(_objective.position);
+        if (gameGrid.PosicionValida((int) objectiveCell.x, (int)objectiveCell.y))
             _pathManager.GoalCell = gameGrid.GetCellAt(_objective.position); 
         else
         {
@@ -83,6 +84,14 @@ public class PathFindingNPCFollow : PathFollowing
         // Por si se ha terminado el path, pero se han añadido nodos al path después
         if (finished && _currentParam < _path.GetLength()) finished = false;
         return base.GetSteering(character);
+    }
+
+    public void reiniciarPath()
+    {
+        _pathSearched = false;
+        finished = false;
+        _currentParam = 0f;
+        if (_path != null) _path.ResetNodes();
     }
 
 }
