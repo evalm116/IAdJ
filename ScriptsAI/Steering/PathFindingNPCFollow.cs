@@ -69,7 +69,8 @@ public class PathFindingNPCFollow : PathFollowing
 
         if (_path == null) _path = new Path();
         else _path.ResetNodes();
-
+        
+        finished = false;
         _pathSearched = false;
     }
 

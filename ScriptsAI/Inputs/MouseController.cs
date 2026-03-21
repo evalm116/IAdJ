@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MouseControllerA : MonoBehaviour
+public class MouseController : MonoBehaviour
 {
     [Header("Referencias")]
     public FormationManager miGestor; 
