@@ -11,15 +11,46 @@ public class Grid : MonoBehaviour
     public Transform padreObstaculos;
 
     public GridCell[,] gridArray;
+    public GameObject floor;
 
     [Header("Debug")]
     public PathFindingAlgorithm debugHeuristics;
 
+
     private void Awake()
     {
+        // Si las filas o columnas no están definidas calculamos el grid automáticamente
+        if (columnas <= 0 || filas <= 0)
+        {
+            // Grid automático basado en el tamaño REAL del Floor (rectangular permitido)
+            var origenGrid = floor.transform.position;
+
+            Vector3 floorSize = GetFloorSize(floor);
+
+            if (floorSize.x > 0 && floorSize.z > 0)
+            {
+                int calcColumns = Mathf.CeilToInt(floorSize.x / cellSize);
+                int calcRows = Mathf.CeilToInt(floorSize.z / cellSize);
+
+                // Usar dimensiones calculadas manteniendo rectangular
+                columnas = calcColumns > 0 ? calcColumns : columnas;
+                filas = calcRows > 0 ? calcRows : filas;
+
+                Debug.Log($"Grid automático rectangular: {columnas}x{filas} celdas (Floor size: {floorSize.x:F2}x{floorSize.z:F2}, cellSize: {cellSize})");
+            }
+            else
+            {
+                Debug.LogWarning($"No se pudo calcular tamaño del Floor automáticamente. Usando valores por defecto: {columnas}x{filas}");
+            }
+
+            // Corrección desde origen (centrar grid)
+            origenGrid = origenGrid - new Vector3(columnas * cellSize, 0, columnas * cellSize) * 0.5f;
+            Debug.Log($"Origen del grid: {origenGrid}");
+            transform.position = origenGrid;
+        }
+
         gridArray = new GridCell[columnas, filas];
         float radioComprobacion = cellSize / 2.1f;
-
 
         // Calcular que celdas y si son transitables
         for (int x = 0; x < columnas; x++)
@@ -28,7 +59,7 @@ public class Grid : MonoBehaviour
             {
                 // Crear celda en x,z
                 // Por defecto transitable en constructor
-                gridArray[x, z] = new GridCell(new Vector2Int(x, z)); 
+                gridArray[x, z] = new GridCell(new Vector2Int(x, z));
                 Vector3 centroCelda = GetCellCenter(x, z);
 
                 // Obtenemos TODOS los colisionadores que tocan el centro de esta celda
@@ -36,7 +67,7 @@ public class Grid : MonoBehaviour
 
                 // El colisionador solo bloquea si es del padreObstaculos
                 foreach (Collider col in collidersDetectados)
-                {                    
+                {
                     if (col.transform.parent != null && col.transform.parent == padreObstaculos)
                     {
                         gridArray[x, z].isWalkable = false;
@@ -89,7 +120,7 @@ public class Grid : MonoBehaviour
         return new Vector3(xPos, transform.position.y, zPos);
     }
 
-    
+
     /// <summary>
     /// Dada una celda, retorna una lista de las celdas vecinas transitables (arriba, abajo, izquierda, derecha).
     /// </summary>
@@ -183,12 +214,34 @@ public class Grid : MonoBehaviour
 
     public GridCell GetCellAt(int x, int z)
     {
-        if (!PosicionValida(x,z))
+        if (!PosicionValida(x, z))
         {
             Debug.LogError($"Posición de celda ({x}, {z}) fuera de los límites del grid.");
             return null;
         }
         return gridArray[x, z];
+    }
+
+    private Vector3 GetFloorSize(GameObject floor)
+    {
+        // Intentar obtener tamaño desde Collider
+        Collider col = floor.GetComponent<Collider>();
+        if (col != null)
+        {
+            return col.bounds.size;
+        }
+
+        // Intentar obtener tamaño desde Renderer
+        Renderer rend = floor.GetComponent<Renderer>();
+        if (rend != null)
+        {
+            return rend.bounds.size;
+        }
+
+        // Fallback: usar escala del transform
+        // Asumimos que un plano por defecto de Unity es 10x10 unidades con scale (1,1,1)
+        Vector3 scale = floor.transform.localScale;
+        return new Vector3(scale.x * 10f, scale.y, scale.z * 10f);
     }
 
 }
