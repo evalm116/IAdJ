@@ -31,7 +31,7 @@ public class SoldadoFSM : MonoBehaviour
         miArrive = GetComponent<Arrive>();
         miFace = GetComponent<Face>();
 
-        // Recuperamos el Align puro que pusiste en el Inspector de Unity
+        // Recuperamos el Align de forma manual para evitar conflictos con el Face
         foreach (Align a in GetComponents<Align>())
         {
             if (a.GetType() == typeof(Align)) miAlign = a;
@@ -44,12 +44,12 @@ public class SoldadoFSM : MonoBehaviour
 
         float distanciaAlTarget = Vector3.Distance(transform.position, miArrive.target.Position);
 
-        // --- 1. LÓGICA DE ESTADOS LIMPIA ---
+        // Lógica de transición de estados basada en la distancia al target
         if (distanciaAlTarget > distanciaParaSprint) estadoActual = Estado.Reagrupando;
         else if (distanciaAlTarget > distanciaLlegadaExacta) estadoActual = Estado.Acercandose;
         else estadoActual = Estado.EnPosicion; 
 
-        // --- 2. EJECUTAR LOS COMPORTAMIENTOS (STEERING) ---
+        // STEERINGs
         switch (estadoActual)
         {
             case Estado.Reagrupando:
@@ -66,7 +66,7 @@ public class SoldadoFSM : MonoBehaviour
                 break;
 
             case Estado.EnPosicion:
-                // AL LLEGAR: Apagamos Face y le QUITAMOS el target para que no nos sabotee
+                // Apagamos Face y le quitamos el target para que no nos sabotee
                 if (miFace != null)
                 {
                     miFace.enabled = false;

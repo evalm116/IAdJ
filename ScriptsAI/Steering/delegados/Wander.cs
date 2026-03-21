@@ -6,13 +6,13 @@ public class Wander : Face
 {
     public float wanderRadius = 3f;
     public float wanderOffset = 4f;
-    // Ahora wanderRate es "cuántos metros se mueve el punto por segundo"
     public float wanderRate = 10f; 
     public float maxAcceleration = 5f;
 
     private Agent wanderTarget;
     
-    // GUARDAMOS LA POSICIÓN LOCAL DEL PUNTO EN EL CÍRCULO
+    // El punto de destino del Wander se mueve dentro de un círculo imaginario delante del agente. 
+    // Este vector almacena la posición local de ese punto, que luego convertiremos a coordenadas globales.
     private Vector3 targetLocalPosition;
 
     public bool isWandering = true; // Interruptor para activar/desactivar el Wander 
@@ -46,7 +46,7 @@ public class Wander : Face
             return stopSteer;
         }
 
-        // 1. MOVER EL PUNTO ALEATORIAMENTE (Jitter)
+        // MOVER EL PUNTO ALEATORIAMENTE (Jitter)
         // Le sumamos un vector aleatorio 3D pequeño cada frame
         targetLocalPosition += new Vector3(
             Random.Range(-1f, 1f), 
@@ -54,20 +54,21 @@ public class Wander : Face
             Random.Range(-1f, 1f)
         ) * wanderRate * Time.deltaTime;
 
-        // 2. DEVOLVERLO AL BORDE DEL CÍRCULO
         // Al normalizarlo y multiplicar por el radio, lo obligamos a no salirse de la línea verde
         targetLocalPosition = targetLocalPosition.normalized * wanderRadius;
 
-        // 3. EMPUJARLO HACIA ADELANTE (El palo de la zanahoria)
+        // EMPUJARLO HACIA ADELANTE (Offset)
+        // Le sumamos un vector hacia adelante para que el círculo no esté centrado en el personaje, sino delante de él
         Vector3 localTargetWithOffset = targetLocalPosition + new Vector3(0, 0, wanderOffset);
 
-        // 4. CONVERTIR AL MUNDO REAL Y DELEGAR EN FACE
+        // Convertimos la posición local del punto a global para que el Face pueda usarlo como target
         wanderTarget.Position = character.transform.TransformPoint(localTargetWithOffset);
         this.target = wanderTarget;
         
         Steering steer = base.GetSteering(character);
 
-        // 5. ACELERAR HACIA EL PUNTO
+        // El steering de Face nos da la rotación necesaria para mirar al punto, 
+        // pero el Wander también necesita una fuerza lineal que empuje al personaje hacia ese punto.
         Vector3 directionToTarget = (wanderTarget.Position - character.Position).normalized;
         steer.linear = directionToTarget * character.MaxAcceleration;
 

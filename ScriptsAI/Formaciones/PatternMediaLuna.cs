@@ -3,8 +3,7 @@ using System.Collections.Generic;
 
 public class PatternMediaLuna : FormationPattern
 {
-    // REQUISITO: Límite de unidades (No menos de 6 personajes en total)
-    public int maxSlots = 6; // 1 Líder + 5 Subordinados
+    public int maxSlots = 6; // 1 Líder + 5 Soldados
 
     public override bool SupportsSlots(int slotCount)
     {
@@ -51,6 +50,7 @@ public class PatternMediaLuna : FormationPattern
         return slotInfo;
     }
 
+    // El offset de deriva se calcula como el centro de masa de las posiciones de los soldados en sus slots.
     public override Vector3 GetDriftOffset(List<SlotAssignment> slotAssignments)
     {
         if (slotAssignments.Count == 0) return Vector3.zero;

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class FormationManager : MonoBehaviour
 {
-    // --- VARIABLES DE LA FORMACIÓN ---
+    // VARIABLES DE LA FORMACIÓN 
     public List<SlotAssignment> slotAssignments = new List<SlotAssignment>();
     private Vector3 driftOffset;
     public FormationPattern pattern;
@@ -18,7 +18,7 @@ public class FormationManager : MonoBehaviour
     private float tiempoMoviendose = 0f;
     private bool enFormacion = true; 
 
-    // --- VARIABLES DEL LÍDER ---
+    // VARIABLES DEL LÍDER
     [Header("Tiempos del Líder")]
     public float tiempoCaminandoWander = 5f; 
     public float tiempoParadoWander = 20f; 
@@ -36,15 +36,13 @@ public class FormationManager : MonoBehaviour
     private Face faceLider;
     private Agent destinoOriginal;
 
-    // NUEVO: Variable para controlar a los muros de forma limpia
-    // IMPORTANTE: Si tu script de muros se llama distinto, cambia este nombre
+    // Variable para controlar a los muros 
     private WallAvoidanceThreeRays wallAvoidanceLider;
     private float pesoOriginalMuros = 10f;
 
 
-    // =========================================================
-    // FUNCIONES BÁSICAS DE GESTIÓN DE LA FORMACIÓN
-    // =========================================================
+    // GESTIÓN DE LA FORMACIÓN
+
     public bool IsInFormation(AgentNPC character)
     {
         foreach (SlotAssignment slot in slotAssignments)
@@ -100,13 +98,13 @@ public class FormationManager : MonoBehaviour
     public bool RemoveCharacter(AgentNPC character)
     {
         if (character == this.GetComponent<AgentNPC>()) return false;
-
+        // Buscamos al personaje en las asignaciones
         int indexToRemove = -1;     
         for (int i = 0; i < slotAssignments.Count; i++)
         {
             if (slotAssignments[i].character == character) { indexToRemove = i; break; }
         }
-        
+        // Si lo encontramos, lo eliminamos y actualizamos las asignaciones
         if (indexToRemove != -1)
         {
             AgentNPC npcToLeave = slotAssignments[indexToRemove].character;
@@ -128,11 +126,12 @@ public class FormationManager : MonoBehaviour
         return false; 
     }
 
-    // =========================================================
-    // START Y UPDATE (LA LÓGICA DE MOVIMIENTO)
-    // =========================================================
+
+    // LÓGICA DE MOVIMIENTO
+
     void Start()
     {
+        // elegimos el patrón
         pattern = new PatternMediaLuna(); 
 
         agenteLider = GetComponent<AgentNPC>();
@@ -145,7 +144,7 @@ public class FormationManager : MonoBehaviour
             if (f.GetType() == typeof(Face)) faceLider = f;
             if (f.GetType() == typeof(Wander)) wanderLider = (Wander)f;
         }
-
+        // Asignamos el líder al slot 0 de la formación
         if (agenteLider != null)
         {
             SlotAssignment leaderSlot = new SlotAssignment();
@@ -153,7 +152,7 @@ public class FormationManager : MonoBehaviour
             leaderSlot.slotNumber = 0;
             slotAssignments.Add(leaderSlot);
         }
-
+        // Guardamos el destino original del Arrive y el peso original de los muros para poder restaurarlos después
         if (arriveLider != null) destinoOriginal = arriveLider.target;
         if (wallAvoidanceLider != null) pesoOriginalMuros = wallAvoidanceLider.weight;
 
@@ -168,9 +167,7 @@ public class FormationManager : MonoBehaviour
     {
         if (pattern == null) return;
 
-        // --------------------------------------------------------
-        // 1. INTERRUPCIÓN MANUAL (Clic Derecho)
-        // --------------------------------------------------------
+        // Clic Derecho para activar el control manual del líder
         if (Input.GetMouseButtonDown(1)) 
         {
             modoManual = true;
@@ -183,9 +180,8 @@ public class FormationManager : MonoBehaviour
             ActivarManual();
         }
 
-        // --------------------------------------------------------
-        // 2. CONTROL DEL MOVIMIENTO DEL LÍDER
-        // --------------------------------------------------------
+        // CONTROL DEL MOVIMIENTO DEL LÍDER
+
         if (modoManual)
         {
             if (arriveLider != null && arriveLider.target != null)
@@ -194,14 +190,14 @@ public class FormationManager : MonoBehaviour
 
                 if (distanciaAlDestino < 1.0f) 
                 {
-                    // Ha llegado a la marca: Mantenemos velocidad a cero y APAGAMOS LOS MUROS temporalmente
+                    // Ha llegado a la marca: Mantenemos velocidad a cero y apagamos los muros temporalmente para que no le arrastre 
                     if (agenteLider != null)
                     {
                         agenteLider.Velocity = Vector3.zero;
                         agenteLider.Rotation = 0f;
                     }
                     if (wallAvoidanceLider != null) wallAvoidanceLider.weight = 0f;
-
+                    // Empezamos a contar el tiempo que lleva parado para volver al Wander
                     cronometroManual += Time.deltaTime;
                     
                     if (cronometroManual >= tiempoInactivoParaWander)
@@ -224,7 +220,7 @@ public class FormationManager : MonoBehaviour
         }
         else
         {
-            // --- MODO DEMO AUTOMÁTICA ---
+            // MODO AUTOMÁTICO 
             cronometroWander += Time.deltaTime;
 
             if (liderDePaseo)
@@ -233,7 +229,7 @@ public class FormationManager : MonoBehaviour
                 {
                     if (wanderLider != null) wanderLider.isWandering = false;
 
-                    // Toca pararse: Clavamos frenos y APAGAMOS LOS MUROS temporalmente
+                    // Toca pararse: Clavamos frenos y apagamos los muros temporalmente
                     if (agenteLider != null)
                     {
                         agenteLider.Velocity = Vector3.zero; 
@@ -258,7 +254,7 @@ public class FormationManager : MonoBehaviour
                 {
                     if (wanderLider != null) wanderLider.isWandering = true;
                     
-                    // Toca caminar: LE DEVOLVEMOS EL INSTINTO DE ESQUIVAR MUROS
+                    // Toca caminar: Le devolvemos el instinto de los muros
                     if (wallAvoidanceLider != null) wallAvoidanceLider.weight = pesoOriginalMuros;
                     
                     liderDePaseo = true;
@@ -267,11 +263,10 @@ public class FormationManager : MonoBehaviour
             }
         }
 
-        // --------------------------------------------------------
-        // 3. LÓGICA DE LA FORMACIÓN (Los soldados le siguen)
-        // --------------------------------------------------------
+        // LIDERFOLLOWING
         float velocidadLider = (agenteLider != null) ? agenteLider.Velocity.magnitude : 0f;
 
+        // Si el líder se está moviendo, vamos acumulando tiempo moviéndonos. Si se para, reseteamos ese tiempo y empezamos a acumular tiempo quietos.
         if (velocidadLider > 0.1f)
         {
             tiempoQuieto = 0f; 
@@ -286,7 +281,7 @@ public class FormationManager : MonoBehaviour
 
             if (tiempoQuieto >= tiempoParaFormar) enFormacion = true; 
         }
-
+        // Si estamos en formación, actualizamos las posiciones de los soldados según el patrón. Si no, los juntamos todos en el punto del pelotón detrás del líder.
         if (enFormacion)
         {
             for (int i = 0; i < slotAssignments.Count; i++)
@@ -311,7 +306,7 @@ public class FormationManager : MonoBehaviour
 
                     // Si el líder está justo al otro lado de la pared, no queremos empujar al soldado contra el líder, así que comprobamos la distancia al líder
                     float distanciaAlLider = Vector3.Distance(transform.position, targetPosition);
-                    float radioSeguridadLider = 2.0f; // 2 metros de espacio personal intocable
+                    float radioSeguridadLider = 2.0f; // 2 metros de espacio personal 
 
                     // Si al empujarlo del muro, se nos ha quedado muy pegado al líder
                     if (distanciaAlLider < radioSeguridadLider)
@@ -329,7 +324,7 @@ public class FormationManager : MonoBehaviour
             }
         }
         else
-        {
+        {   // Fuera de formación, todos los soldados se amontonan en el punto del pelotón detrás del líder
             Vector3 puntoPeloton = transform.position - (transform.forward * 2f);
 
             for (int i = 0; i < slotAssignments.Count; i++)
@@ -343,15 +338,18 @@ public class FormationManager : MonoBehaviour
         }
     }
 
-    // =========================================================
+
     // FUNCIONES DE CONTROL MANUAL
-    // =========================================================
+
+    // Al activar el control manual, le asignamos al Arrive y al Face del líder el destino original que tenía antes, 
+    // para que se mueva hacia donde el jugador le indique. 
     private void ActivarManual()
     {
         if (arriveLider != null) { arriveLider.enabled = true; arriveLider.weight = 1f; arriveLider.target = destinoOriginal; }
         if (faceLider != null) { faceLider.enabled = true; faceLider.weight = 1f; faceLider.target = destinoOriginal; }
     }
 
+    // Al apagar el control manual, le quitamos el destino al Arrive y al Face del líder y los apagamos para que no interfieran con el Wander.  
     private void ApagarManual()
     {
         if (arriveLider != null) { arriveLider.enabled = false; arriveLider.weight = 0f; arriveLider.target = null; }

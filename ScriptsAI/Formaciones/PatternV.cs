@@ -6,10 +6,8 @@ public class PatternV : FormationPattern
     public float separationX = 1f; 
     public float separationZ = 1f; 
     
-    // REQUISITO: Límite de unidades
     public int maxSlots = 6; // 1 líder + 5 soldados
 
-    // REQUISITO: Bloquear si intentan entrar más del límite
     public override bool SupportsSlots(int slotCount)
     {
         return slotCount <= maxSlots;
@@ -19,22 +17,22 @@ public class PatternV : FormationPattern
     {
         SlotTransform slotInfo = new SlotTransform();
 
-        // 1. EL LÍDER (Hueco 0)
+        // LÍDER (Hueco 0)
         if (slotNumber == 0) 
         {
             slotInfo.position = Vector3.zero;
-            slotInfo.orientation = 0f; // Mira hacia el frente (0º)
+            slotInfo.orientation = 0f; // Mira hacia el frente 
             return slotInfo;
         }
 
-        // --- MATEMÁTICAS DE LA POSICIÓN ---
+        // Posiciones de los soldados (Huecos 1 a maxSlots-1)
         float xPos = ((slotNumber + 1) / 2) * separationX;
         if (slotNumber % 2 == 0) xPos = -xPos;
 
         float zPos = -(((slotNumber + 1) / 2) * separationZ); 
         slotInfo.position = new Vector3(xPos, 0, zPos);
 
-        // --- MATEMÁTICAS DE LA ORIENTACIÓN (Mínimo 3 distintas) ---
+        // Orientación: el líder mira al frente, los soldados miran hacia el líder o hacia los flancos dependiendo de su posición
         if (slotNumber == maxSlots - 1)
         {
             // El último soldado de la formación hace de retaguardia. Mira hacia atrás.
