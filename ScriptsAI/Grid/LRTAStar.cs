@@ -28,9 +28,9 @@ public class LRTAStar : PathFindingAlgorithm
             do
             {
                 currentCell = GetNextStep(currentCell);
-                if (currentCell == null)
+                if (currentCell == null) // En caso de que no se encuentre camino
                 {
-                    Debug.LogWarning("No se encontró un camino válido.");
+                    // Nota: no pone log porque ya está en ValueUpdateStep
                     _caminoValido = false;
                     yield break;
                 }
@@ -62,7 +62,7 @@ public class LRTAStar : PathFindingAlgorithm
         List<GridCell> neighbors = grid.GetNeighbors(currentCell);
         foreach (GridCell neighbor in neighbors)
         {
-            if (!espacioBusqueda.Contains(neighbor) && neighbor != GoalCell)
+            if (neighbor != GoalCell)
             {
                 espacioBusqueda.Add(neighbor);
                 if (tamanoEspacio > 1)
@@ -109,6 +109,7 @@ public class LRTAStar : PathFindingAlgorithm
             if (gridHeuristics[actual.gridPosition.x, actual.gridPosition.y] == float.MaxValue)
             {
                 Debug.LogWarning("No se encontró un camino válido.");
+                _caminoValido = false;
                 return;
             }
         }
@@ -133,15 +134,12 @@ public class LRTAStar : PathFindingAlgorithm
             float bestCost = float.MaxValue;
             grid.GetNeighbors(cell).ForEach(neighbor =>
             {
-                // Nota: En pimera parte esto no es necesario porque todos
-                // los costos son 1, pero en la segunda necesitamos calcular
-                // el costo según el terreno. Así que lo dejo.
-                float currentCost = cell.cost + GetCellHeuristicSafe(neighbor);
-                if (currentCost < bestCost)
+                if (GetCellHeuristicSafe(neighbor) < bestCost)
                 {
-                    bestCost = currentCost;
+                    bestCost = GetCellHeuristicSafe(neighbor);
                 }
             });
+
 
             // Máximo entre el valor anterior y el mejor costo calculado
             // max{ temp(u), min_{ a∈A(u)} { w(u, a) + h(Succ(u, a))} }
@@ -149,7 +147,7 @@ public class LRTAStar : PathFindingAlgorithm
 
             // Mínimo entre los calculados
             // arg min_{u∈Slss | h(u) =∞}
-            if (value < minValue)
+            if (value < minValue || minCell == null)
             {
                 minValue = value;
                 minCell = cell;

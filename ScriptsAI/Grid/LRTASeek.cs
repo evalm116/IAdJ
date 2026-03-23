@@ -30,7 +30,6 @@ public class LRTASeek : PathFindingAlgorithm
                 currentCell = GetNextStep(currentCell);
                 if (currentCell == null)
                 {
-                    Debug.LogWarning("No se encontró un camino válido.");
                     _caminoValido = false;
                     return null;
                 }
@@ -60,7 +59,7 @@ public class LRTASeek : PathFindingAlgorithm
         List<GridCell> neighbors = grid.GetNeighbors(currentCell);
         foreach (GridCell neighbor in neighbors)
         {
-            if (!espacioBusqueda.Contains(neighbor) && neighbor != GoalCell)
+            if (neighbor != GoalCell)
             {
                 espacioBusqueda.Add(neighbor);
                 if (tamanoEspacio > 1)
@@ -131,9 +130,6 @@ public class LRTASeek : PathFindingAlgorithm
             float bestCost = float.MaxValue;
             grid.GetNeighbors(cell).ForEach(neighbor =>
             {
-                // Nota: En pimera parte esto no es necesario porque todos
-                // los costos son 1, pero en la segunda necesitamos calcular
-                // el costo según el terreno. Así que lo dejo.
                 float currentCost = cell.cost + GetCellHeuristicSafe(neighbor);
                 if (currentCost < bestCost)
                 {
@@ -147,7 +143,7 @@ public class LRTASeek : PathFindingAlgorithm
 
             // Mínimo entre los calculados
             // arg min_{u∈Slss | h(u) =∞}
-            if (value < minValue)
+            if (value < minValue || minCell == null)
             {
                 minValue = value;
                 minCell = cell;

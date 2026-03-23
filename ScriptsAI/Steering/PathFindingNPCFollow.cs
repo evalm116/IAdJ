@@ -81,18 +81,17 @@ public class PathFindingNPCFollow : PathFollowing
             StartCoroutine(_pathManager.FindPath(gameGrid.GetCellAt(character.Position), localAreaRadius, _path));
             _pathSearched = true;
         }
+
+        if (!_pathManager.CaminoValido)
+        {
+            character.StopMoving(); 
+            return new Steering();
+        }
+
         if (_objective == null || gameGrid == null) return new Steering();
         // Por si se ha terminado el path, pero se han añadido nodos al path después
         if (finished && _currentParam < _path.GetLength()) finished = false;
         return base.GetSteering(character);
-    }
-
-    public void reiniciarPath()
-    {
-        _pathSearched = false;
-        finished = false;
-        _currentParam = 0f;
-        if (_path != null) _path.ResetNodes();
     }
 
 }

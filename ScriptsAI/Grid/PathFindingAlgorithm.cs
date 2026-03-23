@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,8 +16,7 @@ public abstract class PathFindingAlgorithm : MonoBehaviour
 
     public Grid grid;
     public float[,] gridHeuristics;
-    protected GridCell _goalCell;
-    protected bool _caminoValido = true;
+    protected GridCell _goalCell;    
     public GridCell GoalCell
     {
         get => _goalCell;
@@ -24,8 +24,15 @@ public abstract class PathFindingAlgorithm : MonoBehaviour
         {
             _goalCell = value;
             // Reiniciar las heurísticas aprendidas de todas las celdas al cambiar la meta
-            ResetHeuristics();
+            ResetPathFinding();
         }
+    }
+
+
+    protected bool _caminoValido = true;
+    public bool CaminoValido
+    {
+        get => _caminoValido;
     }
 
     private void Start()
@@ -132,5 +139,11 @@ public abstract class PathFindingAlgorithm : MonoBehaviour
                 gridHeuristics[x, z] = -1.0f;
             }
         }
+    }
+
+    public void ResetPathFinding()
+    {
+        _caminoValido = true;
+        ResetHeuristics();
     }
 }
