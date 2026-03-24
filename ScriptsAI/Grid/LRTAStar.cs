@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class LRTAStar : PathFindingAlgorithm
 {
-   /// <summary>
+    /// <summary>
     /// Calcula el siguiente paso a seguir desde la celda de inicio utilizando el algoritmo LRTA*.
     /// En esta versión solo se calcula el siguiente paso, no toda la ruta.  Algoritmo según el libro 
     /// "Edelkamp, S., & Schrödl, S. (2012). Heuristic search : theory and applications Stefan Edelkamp,
@@ -16,7 +16,7 @@ public class LRTAStar : PathFindingAlgorithm
     public IEnumerator FindPath(GridCell startCell, int radioEspacioBusqueda, Path path)
     {
         GridCell currentCell = startCell;
-        HashSet<GridCell> espacioBusqueda;
+        List<GridCell> espacioBusqueda;
         _caminoValido = true;
         while (currentCell != GoalCell && _caminoValido)
         {
@@ -28,6 +28,8 @@ public class LRTAStar : PathFindingAlgorithm
             do
             {
                 currentCell = GetNextStep(currentCell);
+                Vector2Int pos = currentCell.gridPosition;
+                path.AddNode(grid.GetCellCenter(currentCell.gridPosition.x, currentCell.gridPosition.y));
                 if (currentCell == null) // En caso de que no se encuentre camino
                 {
                     // Nota: no pone log porque ya está en ValueUpdateStep
@@ -36,38 +38,59 @@ public class LRTAStar : PathFindingAlgorithm
                 }
             }
             while (espacioBusqueda.Contains(currentCell));
-
-            Vector2Int pos = currentCell.gridPosition;
-            path.AddNode(grid.GetCellCenter(currentCell.gridPosition.x, currentCell.gridPosition.y));
-            yield return null; 
+            
+            yield return null;
         }
     }
 
+    public class nodoBusqueda
+    {
+        public GridCell currentCell;
+        public bool visited;
 
+        public nodoBusqueda(GridCell cell)
+        {
+            currentCell = cell;
+            visited = false;
+        }
+
+        public bool equals(nodoBusqueda other)
+        {
+            return this.currentCell.gridPosition == other.currentCell.gridPosition;
+        }
+
+    }
     /// <summary>
     /// Calcula el espacio de búsqueda a partir de la celda actual. Consideramos que el personaje solo se mueve en vertical y horizontal.
     /// </summary>
     /// <param name="currentCell">Celda origen</param>
     /// <param name="tamanoEspacio">Radio del espacio de búsqueda</param>
     /// <returns></returns>
-    public HashSet<GridCell> GetEspacioBusqueda(GridCell currentCell, int tamanoEspacio)
+    public List<GridCell> GetEspacioBusqueda(GridCell currentCell, int tamanoEspacio)
     {
-        HashSet<GridCell> espacioBusqueda = new HashSet<GridCell>
-        {
-            // Agregar la celda actual al espacio de búsqueda
-            currentCell
-        };
+        
+
+        Queue<(GridCell, int)> nodosBusquedas = new Queue<(GridCell, int)>();
+        List<GridCell> espacioBusqueda = new List<GridCell>();
+
+        nodosBusquedas.Enqueue((currentCell, 1));
 
         // Agregar los vecinos de la celda actual al espacio de búsqueda
-        List<GridCell> neighbors = grid.GetNeighbors(currentCell);
-        foreach (GridCell neighbor in neighbors)
-        {
-            if (neighbor != GoalCell)
+        
+        while (nodosBusquedas.Any())
+        {            
+            (var nodo, var radio) = nodosBusquedas.Dequeue();
+            espacioBusqueda.Add(nodo);
+            var neighborCells = grid.GetNeighbors(nodo);
+            foreach (GridCell neighbor in neighborCells)
             {
-                espacioBusqueda.Add(neighbor);
-                if (tamanoEspacio > 1)
+                if (neighbor != GoalCell && !espacioBusqueda.Contains(neighbor))
                 {
-                    espacioBusqueda.UnionWith(GetEspacioBusqueda(neighbor, tamanoEspacio - 1));
+                    espacioBusqueda.Add(neighbor);
+                    if (radio < tamanoEspacio )
+                    {
+                        nodosBusquedas.Enqueue((neighbor, radio + 1));
+                    }
                 }
             }
         }
@@ -82,7 +105,7 @@ public class LRTAStar : PathFindingAlgorithm
     /// </summary>
     /// <param name="goalCell"></param>
     /// <param name="espacioBusqueda"></param>
-    public void ValueUpdateStep(GridCell goalCell, HashSet<GridCell> espacioBusqueda)
+    public void ValueUpdateStep(GridCell goalCell, List<GridCell> espacioBusqueda)
     {
         List<(GridCell, float)> oldValues = new List<(GridCell, float)>();
         List<GridCell> infinitos = new List<GridCell>();
@@ -92,7 +115,6 @@ public class LRTAStar : PathFindingAlgorithm
         {
             oldValues.Add((cell, GetCellHeuristicSafe(cell)));
             gridHeuristics[cell.gridPosition.x, cell.gridPosition.y] = float.MaxValue;
-            // cell.learnedHeuristic = float.MaxValue;
             infinitos.Add(cell);
         }
 
@@ -103,9 +125,7 @@ public class LRTAStar : PathFindingAlgorithm
             (actual, new_value) = ArgMinMax(infinitos, oldValues, goalCell);
             infinitos.Remove(actual);
             gridHeuristics[actual.gridPosition.x, actual.gridPosition.y] = new_value;
-            //actual.learnedHeuristic = new_value;
 
-            //if (actual.learnedHeuristic == float.MaxValue)
             if (gridHeuristics[actual.gridPosition.x, actual.gridPosition.y] == float.MaxValue)
             {
                 Debug.LogWarning("No se encontró un camino válido.");
@@ -143,7 +163,7 @@ public class LRTAStar : PathFindingAlgorithm
 
             // Máximo entre el valor anterior y el mejor costo calculado
             // max{ temp(u), min_{ a∈A(u)} { w(u, a) + h(Succ(u, a))} }
-            float value = Mathf.Max(oldValue, bestCost);
+            float value = Mathf.Max(oldValue, bestCost + cell.cost);
 
             // Mínimo entre los calculados
             // arg min_{u∈Slss | h(u) =∞}
@@ -186,8 +206,7 @@ public class LRTAStar : PathFindingAlgorithm
                 bestNextCell = neighbor;
             }
         }
-
         return bestNextCell;
     }
-   
+
 }

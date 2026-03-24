@@ -17,7 +17,7 @@ public class LRTASeek : PathFindingAlgorithm
     public GridCell FindPath(GridCell startCell, int radioEspacioBusqueda)
     {
         GridCell currentCell = startCell;
-        HashSet<GridCell> espacioBusqueda;
+        List<GridCell> espacioBusqueda;
         if (currentCell != GoalCell && _caminoValido)
         {
             espacioBusqueda = GetEspacioBusqueda(currentCell, radioEspacioBusqueda);
@@ -47,24 +47,31 @@ public class LRTASeek : PathFindingAlgorithm
     /// <param name="currentCell">Celda origen</param>
     /// <param name="tamanoEspacio">Radio del espacio de búsqueda</param>
     /// <returns></returns>
-    public HashSet<GridCell> GetEspacioBusqueda(GridCell currentCell, int tamanoEspacio)
+    public List<GridCell> GetEspacioBusqueda(GridCell currentCell, int tamanoEspacio)
     {
-        HashSet<GridCell> espacioBusqueda = new HashSet<GridCell>
-        {
-            // Agregar la celda actual al espacio de búsqueda
-            currentCell
-        };
+
+
+        Queue<(GridCell, int)> nodosBusquedas = new Queue<(GridCell, int)>();
+        List<GridCell> espacioBusqueda = new List<GridCell>();
+
+        nodosBusquedas.Enqueue((currentCell, 1));
 
         // Agregar los vecinos de la celda actual al espacio de búsqueda
-        List<GridCell> neighbors = grid.GetNeighbors(currentCell);
-        foreach (GridCell neighbor in neighbors)
+
+        while (nodosBusquedas.Any())
         {
-            if (neighbor != GoalCell)
+            (var nodo, var radio) = nodosBusquedas.Dequeue();
+            espacioBusqueda.Add(nodo);
+            var neighborCells = grid.GetNeighbors(nodo);
+            foreach (GridCell neighbor in neighborCells)
             {
-                espacioBusqueda.Add(neighbor);
-                if (tamanoEspacio > 1)
+                if (neighbor != GoalCell && !espacioBusqueda.Contains(neighbor))
                 {
-                    espacioBusqueda.UnionWith(GetEspacioBusqueda(neighbor, tamanoEspacio - 1));
+                    espacioBusqueda.Add(neighbor);
+                    if (radio < tamanoEspacio)
+                    {
+                        nodosBusquedas.Enqueue((neighbor, radio + 1));
+                    }
                 }
             }
         }
@@ -79,7 +86,7 @@ public class LRTASeek : PathFindingAlgorithm
     /// </summary>
     /// <param name="goalCell"></param>
     /// <param name="espacioBusqueda"></param>
-    public void ValueUpdateStep(GridCell goalCell, HashSet<GridCell> espacioBusqueda)
+    public void ValueUpdateStep(GridCell goalCell, List<GridCell> espacioBusqueda)
     {
         List<(GridCell, float)> oldValues = new List<(GridCell, float)>();
         List<GridCell> infinitos = new List<GridCell>();
@@ -182,6 +189,9 @@ public class LRTASeek : PathFindingAlgorithm
                 bestNextCell = neighbor;
             }
         }
+
+        gridHeuristics[currentCell.gridPosition.x, currentCell.gridPosition.y] = Mathf.Max(minF, GetCellHeuristicSafe(currentCell));
+
 
         return bestNextCell;
     }

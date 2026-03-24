@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PathFindingNPCFollow : PathFollowing
 {
+    [Header("PathFinding Settings")]
     public Transform _objective;
     public Grid gameGrid;
     public int localAreaRadius = 1;
