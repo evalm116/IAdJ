@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MouseControllerFormation : MonoBehaviour
+public class MouseControllerPathfinding : MonoBehaviour
 {
     [Header("Referencias")]
     public FormationManager miGestor;
@@ -68,7 +68,7 @@ public class MouseControllerFormation : MonoBehaviour
         }
 
         // ---------------------------------------------------------
-        // 3. ORDEN: UNIRSE A LA FORMACIÓN (Tecla 'F') - Apartado H
+        // 3. ORDEN: UNIRSE A LA FORMACIÓN (Tecla 'F')
         // ---------------------------------------------------------
         if (Input.GetKeyDown(KeyCode.F) && soldadosSeleccionados.Count > 0)
         {
@@ -88,7 +88,7 @@ public class MouseControllerFormation : MonoBehaviour
         }
 
         // ---------------------------------------------------------
-        // 4. ORDEN: MOVER (Clic Derecho) - Apartado C
+        // 4. ORDEN: MOVER (Clic Derecho)
         // ---------------------------------------------------------
         if (Input.GetMouseButtonDown(1) && soldadosSeleccionados.Count > 0)
         {
