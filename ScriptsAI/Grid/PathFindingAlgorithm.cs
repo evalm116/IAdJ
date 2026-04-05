@@ -63,6 +63,17 @@ public abstract class PathFindingAlgorithm : MonoBehaviour
     }
 
     /// <summary>
+    /// Sobreescribe la heurística de una celda en la matriz de heurísticas
+    /// </summary>
+    /// <param name="cell">Celda a actualizar</param>
+    /// <param name="value">Nuevo valor</param>    
+    protected void SetGridHeuristic(GridCell cell, float value)
+    {
+        Vector2Int pos = cell.gridPosition;
+        gridHeuristics[pos.x, pos.y] = value;
+    }
+
+    /// <summary>
     /// Calcula la heurística según el tipo seleccionado por la clase.
     /// </summary>
     /// <param name="currentCell"></param>

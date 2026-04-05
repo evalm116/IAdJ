@@ -9,6 +9,10 @@ public class Path
     [SerializeField] protected List<float> _cummulativeLength;
     [SerializeField] protected float _totalLength;
 
+    // Gizmo settings
+    [SerializeField] protected Color _gizmoNodeColor = Color.green;
+    [SerializeField] protected Color _gizmoLineColor = Color.red;
+    [SerializeField] protected float _gizmoSphereRadius = 0.15f;
     public List<Vector3> PathNodes
     {
         get { return _pathNodes; }
@@ -131,6 +135,12 @@ public class Path
         }
     }
 
+    public void Reverse()
+    {
+        _pathNodes.Reverse();
+        SetUpCummulative();
+    }
+
     internal void ResetNodes()
     {
         _pathNodes = new List<Vector3>();
@@ -140,5 +150,32 @@ public class Path
 
     public float GetLength() {
         return _totalLength;
+    }
+
+    // Draw path nodes as spheres and connecting lines as a different color.
+    // Note: Unity only invokes OnDrawGizmos on Components (MonoBehaviour/ScriptableObject).
+    // Keep this method here so a MonoBehaviour that owns a Path instance can call path.OnDrawGizmos()
+    // or refactor Path into a ScriptableObject/component if you want automatic editor drawing.
+    public void OnDrawGizmos()
+    {
+        if (_pathNodes == null || _pathNodes.Count == 0) return;
+
+        Color prev = Gizmos.color;
+
+        // Draw lines
+        Gizmos.color = _gizmoLineColor;
+        for (int i = 0; i < _pathNodes.Count - 1; i++)
+        {
+            Gizmos.DrawLine(_pathNodes[i], _pathNodes[i + 1]);
+        }
+
+        // Draw spheres for nodes
+        Gizmos.color = _gizmoNodeColor;
+        for (int i = 0; i < _pathNodes.Count; i++)
+        {
+            Gizmos.DrawSphere(_pathNodes[i], _gizmoSphereRadius);
+        }
+
+        Gizmos.color = prev;
     }
 }

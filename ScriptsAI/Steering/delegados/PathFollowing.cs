@@ -12,12 +12,15 @@ public class PathFollowing : Seek
     [SerializeField] public bool loop;
     protected bool finished;
 
+    [Header("Debug PathFollowing")]
+    [SerializeField] protected bool _debug;
+
     public GameObject PathParent
     {
         get { return _pathParent; }
-        set { _pathParent = value;  SetUpPath(); }
+        set { _pathParent = value; SetUpPath(); }
     }
-    
+
     public float PathOffset
     {
         get { return _pathOffset; }
@@ -100,6 +103,14 @@ public class PathFollowing : Seek
     {
         if (target != null)
             Destroy(target.gameObject);
+    }
+
+    public void OnDrawGizmos()
+    {
+        if (_debug && _path != null)
+        {
+            _path.OnDrawGizmos();
+        }
     }
 }
 
