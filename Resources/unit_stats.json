@@ -1,0 +1,101 @@
+
+{
+  "units": [
+    {
+      "type": "Heavy",
+      "maxSpeed": 1,
+      "maxHealth": 200,
+      "attack": 35,
+      "magicAttack": false,
+      "physicalDefense": 20,
+      "magicDefense": 10,
+      "dodge": 0.03,
+      "range": 1.5,
+      "attackCooldown": 1.0
+    },
+    {
+      "type": "Light",
+      "maxSpeed": 1.75,
+      "maxHealth": 100,
+      "attack": 20,
+      "magicAttack": false,
+      "physicalDefense": 10,
+      "magicDefense": 5,
+      "dodge": 0.10,
+      "range": 1.5,
+      "attackCooldown": 1.0
+    },
+    {
+      "type": "Cavalry",
+      "maxSpeed": 2.0,
+      "maxHealth": 150,
+      "attack": 30,
+      "magicAttack": false,
+      "physicalDefense": 15,
+      "magicDefense": 7,
+      "dodge": 0.08,
+      "range": 1.5,
+      "attackCooldown": 1.0
+    },
+    {
+      "type": "Archer",
+      "maxSpeed": 1.5,
+      "maxHealth": 60,
+      "attack": 15,
+      "magicAttack": false,
+      "physicalDefense": 5,
+      "magicDefense": 2,
+      "dodge": 0.12,
+      "range": 10.0,
+      "attackCooldown": 1.0
+    },
+    {
+      "type": "Wizard",
+      "maxSpeed": 1.4,
+      "maxHealth": 80,
+      "attack": 25,
+      "magicAttack": true,
+      "physicalDefense": 3,
+      "magicDefense": 15,
+      "dodge": 0.10,
+      "range": 12.0,
+      "attackCooldown": 1.0
+    },
+    {
+      "type": "Guerrilla",
+      "maxSpeed": 2.0,
+      "maxHealth": 90,
+      "attack": 22,
+      "magicAttack": false,
+      "physicalDefense": 8,
+      "magicDefense": 4,
+      "dodge": 0.15,
+      "range": 8.0,
+      "attackCooldown": 1.0
+    },
+    {
+      "type": "Healer",
+      "maxSpeed": 1.4,
+      "maxHealth": 70,
+      "attack": 20,
+      "magicAttack": false,
+      "physicalDefense": 4,
+      "magicDefense": 12,
+      "dodge": 0.10,
+      "range": 10.0,
+      "attackCooldown": 1.0
+    },
+    {
+      "type": "Soldier",
+      "maxSpeed": 1.4,
+      "maxHealth": 70,
+      "attack": 20,
+      "magicAttack": false,
+      "physicalDefense": 4,
+      "magicDefense": 12,
+      "dodge": 0.10,
+      "range": 10.0,
+      "attackCooldown": 1.0
+    }
+  ]
+}

@@ -59,7 +59,8 @@ public class Grid : MonoBehaviour
             {
                 // Crear celda en x,z
                 // Por defecto transitable en constructor
-                gridArray[x, z] = new GridCell(new Vector2Int(x, z));
+                TipoTerreno terreno = GetTerrainAt(GetCellCenter(x, z));
+                gridArray[x, z] = new GridCell(new Vector2Int(x, z), terreno);
                 Vector3 centroCelda = GetCellCenter(x, z);
 
                 // Obtenemos TODOS los colisionadores que tocan el centro de esta celda
@@ -244,4 +245,30 @@ public class Grid : MonoBehaviour
         return new Vector3(scale.x * 10f, scale.y, scale.z * 10f);
     }
 
+    private TipoTerreno GetTerrainAt(Vector3 position)
+    {
+        // Define la máscara para golpear solo la capa "LayerGround"
+        int groundLayerMask = -1;
+        int groundLayerIndex = LayerMask.NameToLayer("GroundLayer");
+        if (groundLayerIndex != -1)
+        {
+            groundLayerMask = 1 << groundLayerIndex;
+        }
+
+        // Lanza el rayo
+        Vector3 rayStart = position;
+        rayStart.y += 1f;
+        if (Physics.Raycast(rayStart, Vector3.down, out RaycastHit hit, 5f, groundLayerMask))
+        {
+            // Intenta obtener el componente TerrenoInfo del objeto golpeado
+            TerrenoInfo info = hit.collider.GetComponent<TerrenoInfo>();
+            if (info != null)
+            {
+                return info.TerrainType;
+            }
+        }
+
+        // Si no golpea nada o el componente falta, devuelve un tipo seguro.
+        return TipoTerreno.Plain;
+    }
 }
