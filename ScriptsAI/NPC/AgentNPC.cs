@@ -15,7 +15,7 @@ public class AgentNPC : Agent
     // Este será el steering final que se aplique al personaje.
     [SerializeField] protected Steering steer;
     // Todos los steering que tiene que calcular el agente.
-    private List<SteeringBehaviour> listSteerings;
+    protected List<SteeringBehaviour> listSteerings;
 
     public NPCType currentType;
 
@@ -32,7 +32,7 @@ public class AgentNPC : Agent
 
 
     // Use this for initialization
-    void Start()
+    protected virtual void Start()
     {
         this.Velocity = Vector3.zero;
     }

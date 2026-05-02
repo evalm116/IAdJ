@@ -160,18 +160,10 @@ public abstract class Unit : MonoBehaviour
 
     private DetectorTerreno detectorTerreno;
 
+    public readonly LayerMask capasTerreno = 8; // Asignar en el inspector las capas que representan el terreno
     public TipoTerreno GetTerrainUnderUnit()
     {
-        if (detectorTerreno == null)
-        {
-            detectorTerreno = GetComponent<DetectorTerreno>();
-        }
-
-        if (detectorTerreno != null)
-        {
-            TipoTerreno terrain = detectorTerreno.GetTipoTerrenoActual();
-            return terrain;
-        }
+        DetectorTerreno.DetectarTerreno(this.transform, 10f, capasTerreno);
 
         // Fallback: buscar en el Grid
         TipoTerreno gridTerrain = GetTerrainFromGridFallback();
