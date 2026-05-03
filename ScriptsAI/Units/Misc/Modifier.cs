@@ -76,13 +76,28 @@ public sealed class Modifier
         return PTM[(int)Attacker.GetTerrainUnderUnit(), (int)Attacker.getType()] / DTM[(int)Defender.GetTerrainUnderUnit(), (int)Defender.getType()];
     }
 
+    public double getPrecisionModifier(Unit.Type attackerType, Unit.Type defenderType, TipoTerreno attackerTerrain, TipoTerreno defenderTerrain)
+    {
+        return PTM[(int)attackerTerrain, (int)attackerType] / DTM[(int)defenderTerrain, (int)defenderType];
+    }
+
     public double getAttackModifier(Unit Attacker, Unit Defender)
     {
         return AM[(int)Attacker.getType(), (int)Defender.getType()];
     }
 
+    public double getAttackModifier(Unit.Type attackerType, Unit.Type defenderType)
+    {
+        return AM[(int)attackerType, (int)defenderType];
+    }
+
     public double getMovementModifier(Unit unit, TerrenoInfo terrain)
     {
-        return MTM[(int)terrain.TerrainType, (int)unit.getType()];
+        return getMovementModifier(unit.getType(), terrain.TerrainType);
+    }
+
+    public double getMovementModifier(Unit.Type unitType, TipoTerreno terrain)
+    {
+        return MTM[(int)terrain, (int)unitType];
     }
 }
