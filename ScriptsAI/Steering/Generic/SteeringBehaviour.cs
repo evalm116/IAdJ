@@ -43,11 +43,11 @@ public class SteeringBehaviour : MonoBehaviour
 
     protected float GetArriveDistance(AgentNPC character)
     {
-        if (character.Velocity.magnitude > 0)
+        if (character.Velocity.magnitude > 1)
         {
-            return 0.04f * character.Velocity.magnitude;
+            return 0.1f * character.Velocity.magnitude;
         }
         // Si está parado devolvemos distancia fija
-        return 0.1f;
+        return 0.5f;
     }
 }

@@ -8,6 +8,7 @@ using TMPro;
 
 public enum BANDO
 {
+    None,
     Red,
     Blue
 }
@@ -59,7 +60,7 @@ public abstract class Unit : MonoBehaviour
     // Variables protegidas de estado interno
     protected float _lastAttackTime = -Mathf.Infinity;
     protected float _deathTime = -Mathf.Infinity;
-    protected bool _isDead = false;
+    public bool _isDead = false;
 
     // TODO: temporalmente aqui, borrar cuando se haga el comportamiento de las unidades.
     [Tooltip("Where the agent should seek to")]
@@ -69,6 +70,7 @@ public abstract class Unit : MonoBehaviour
     public float weight = 1f;
     Seek seek;
 
+    public System.Action<Unit> OnDeath;
     protected virtual void Start()
     {
         this.agent = GetComponent<AgentNPC>();
@@ -127,7 +129,7 @@ public abstract class Unit : MonoBehaviour
     }
     public bool isInRange(Unit target)
     {
-        Debug.Log("target nulo? " + (target == null));
+        // Debug.Log("target nulo? " + (target == null));
         return Vector3.Distance(this.getPosition(), target.getPosition()) <= this.range;
     }
 
@@ -286,12 +288,17 @@ public abstract class Unit : MonoBehaviour
     /// Maneja la muerte de la unidad
     /// </summary>
     private void Die()
-    {
-        gameObject.SetActive(false);
+    {        
         _isDead = true;
         _deathTime = Time.time;
         // TODO: Esto lo debe hacer el árbol de comportamiento
         FindObjectsByType<GameManager>(FindObjectsSortMode.None)[0].RegisterDeadUnit(this);
+        
+        var a = gameObject.GetComponent<PathFindingTactical>();
+        if (a != null) a.ForceRepath();
+
+        OnDeath?.Invoke(this); // TODO: pasar el objetivo que mató a la unidad
+        gameObject.SetActive(false);
     }
 
 
@@ -314,9 +321,9 @@ public abstract class Unit : MonoBehaviour
         this.health = this.maxHealth;
 
         // Usar siempre el respawn point del StrategicManager si existe
-        if (respawnPoint != Vector3.zero)
-        {
-            this.agent.Position = respawnPoint;
+        if (respawnPoint != null)
+        {   
+            this.agent.Position = new Vector3(respawnPoint.x, agent.Position.y, respawnPoint.z);
         }
         else
         {
@@ -347,6 +354,15 @@ public abstract class Unit : MonoBehaviour
     public float getRespawnTime()
     {
         return this.respawnTime;
+    }
+
+    // Evento que se dispara cuando la unidad es deshabilitada (muere)
+    // Necesario para los objetivos
+    public System.Action<Unit> OnUnitDisabled;
+
+    void OnDisable()
+    {
+        OnUnitDisabled?.Invoke(this);
     }
 
 }

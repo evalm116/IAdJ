@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class AStartTactical : PathFindingAlgorithm
+public class AStarTactical : PathFindingAlgorithm
 {
     public GridCell[,] parentGrid;
     public float[,] terrainCosts;
@@ -29,7 +29,7 @@ public class AStartTactical : PathFindingAlgorithm
                 costs[i, j] = 1 / (float)Modifier.GetInstance().getMovementModifier(_unitType, grid.GetCellAt(i, j).terrainType);
             }
         }
-        return null;
+        return costs;
     }
 
     public Path FindPath(GridCell startCell)
@@ -37,6 +37,8 @@ public class AStartTactical : PathFindingAlgorithm
         parentGrid = new GridCell[grid.columnas, grid.filas];
         ResetParents();
 
+        if (terrainCosts == null)
+            terrainCosts = GetTerrainCostsForUnitType(_unitType);
 
         List<GridCell> closed = new List<GridCell>();
         var open = new PriorityQueue<GridCell, float>();
@@ -62,13 +64,23 @@ public class AStartTactical : PathFindingAlgorithm
 
     public Path FindPath(GridCell startCell, Unit.Type unitType)
     {
-        this.UnitType = unitType;
+        if (unitType != this.UnitType)
+        {
+            this.UnitType = unitType;
+            terrainCosts = GetTerrainCostsForUnitType(_unitType);
+        }
+
         return FindPath(startCell);
     }
     public Path FindPath(GridCell startCell, GridCell endCell, Unit.Type unitType)
     {
         this._goalCell = endCell;
-        this.UnitType = unitType;
+        if (unitType != this.UnitType)
+        {
+            this.UnitType = unitType;
+            terrainCosts = GetTerrainCostsForUnitType(_unitType);
+        }
+        
         return FindPath(startCell);
     }
 
@@ -161,7 +173,6 @@ public class AStartTactical : PathFindingAlgorithm
         }
         return null;
     }
-
 
     private Path ReconstructPath()
     {

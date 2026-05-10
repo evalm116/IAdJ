@@ -39,8 +39,9 @@ public abstract class PathFindingAlgorithm : MonoBehaviour
     {
         if (grid == null)
         {
+            grid = GameManager.Instance.GameGrid;
             Debug.LogError("Grid no está asignada en el PathfindingManager.");
-            return;
+            //return;
         }
         gridHeuristics = new float[grid.columnas, grid.filas];
         ResetHeuristics();
