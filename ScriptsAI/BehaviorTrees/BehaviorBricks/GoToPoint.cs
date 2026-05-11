@@ -23,15 +23,26 @@ namespace BBUnity.Actions
         [Help("The point that the unit will move to")]
         private Vector3 targetPoint;
         // Start is called before the first frame update
+
+        TaskStatus startStatus = TaskStatus.RUNNING;
         public override void OnStart()
         {
             isDead = false;
+            GameManager gameManager = GameManager.Instance;
             unit = gameObject.GetComponent<Unit>();
-            pathFollowing = gameObject.GetComponent<PathFindingTactical>();
-            pathFollowing.Objective.position = targetPoint;
+            pathFollowing = gameObject.GetComponent<PathFindingTactical>();                       
+            
+            Vector3? val = gameManager.GetUnitTarget(unit);
+            if (!val.HasValue)
+            {
+                startStatus = TaskStatus.FAILED;
+                return;
+            }
+
+            pathFollowing.Objective.position = val.Value;
             pathFollowing.SetUpObjective();
 
-               unit.OnUnitDisabled += HandleUnitDeath;
+            unit.OnUnitDisabled += HandleUnitDeath;
         }
 
   
@@ -45,6 +56,11 @@ namespace BBUnity.Actions
         // Update is called once per frame
         public override TaskStatus OnUpdate()
         {
+            if (startStatus == TaskStatus.FAILED)
+            {
+                return TaskStatus.FAILED;
+            }
+
             if (pathFollowing.Finished)
             {
                 return TaskStatus.COMPLETED;

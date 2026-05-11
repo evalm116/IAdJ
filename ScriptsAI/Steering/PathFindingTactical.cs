@@ -54,6 +54,7 @@ public class PathFindingTactical : PathFollowing
             GameObject dummy = new GameObject("DummyObjectiveTarget");
             dummy.AddComponent<Agent>();
             _objective = dummy.transform;
+            _objective.position = GameManager.Instance.GetInitialPosition(GetComponent<Unit>());
         }
 
         if (gameGrid == null)

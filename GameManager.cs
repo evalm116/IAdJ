@@ -152,4 +152,18 @@ public class GameManager : MonoBehaviour
         return null;
     }
 
+    public Vector3 GetInitialPosition(Unit u)
+    {
+        BANDO bANDO = u.teamID;
+        if (bANDO == BANDO.Red)
+        {
+            return Objectives.Last()[0].transform.position;
+        }
+        else if (bANDO == BANDO.Blue)
+        {
+            return Objectives[0][0].transform.position;
+        }
+        return Vector3.zero;
+    }
+
 }
