@@ -55,13 +55,15 @@ public class GameManager : MonoBehaviour
 
         tacticalAIBlue = gameObject.AddComponent<TacticalAI>();
         tacticalAIBlue.teamID = BANDO.Blue;
-        tacticalAIBlue.CurrentStrategy = TacticalAI.Strategy.Defensive;
-        tacticalAIBlue.currentOffensiveState = TacticalAI.OffensiveState.Gather;
+        tacticalAIBlue.Construct();
+        tacticalAIBlue.CurrentStrategy = TacticalAI.Strategy.Offensive;
+        tacticalAIBlue.currentAttackState = TacticalAI.AttackState.Gather;
 
         tacticalAIRed = gameObject.AddComponent<TacticalAI>();
         tacticalAIRed.teamID = BANDO.Red;
-        tacticalAIRed.CurrentStrategy = TacticalAI.Strategy.Defensive;
-        tacticalAIRed.currentOffensiveState = TacticalAI.OffensiveState.Gather;
+        tacticalAIRed.Construct();
+        tacticalAIRed.CurrentStrategy = TacticalAI.Strategy.Offensive;
+        tacticalAIRed.currentAttackState = TacticalAI.AttackState.Gather;
     }
 
     public List<List<T>> GetGroupedComponents<T>(GameObject parent) where T : Component

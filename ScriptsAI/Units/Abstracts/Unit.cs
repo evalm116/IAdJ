@@ -365,4 +365,8 @@ public abstract class Unit : MonoBehaviour
         OnUnitDisabled?.Invoke(this);
     }
 
+    internal bool IsHealLow()
+    {
+        return ((float)health / maxHealth) < 0.5f;
+    }
 }

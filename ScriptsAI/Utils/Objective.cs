@@ -36,11 +36,12 @@ public class Objective : MonoBehaviour
             unit.OnUnitDisabled += HandleUnitExit; // Acción en caso de muerte dentro del objetivo
             unitsInObjective.Add(unit);
             checkContested();
+            OnObjectiveEntered?.Invoke(this);
         }
         else
         {
             Debug.LogWarning($"Unit {unit.type} and {unit.teamID} entered objective but was already registered as inside.");
-        }
+        }        
     }
 
     /// <summary>
@@ -198,7 +199,13 @@ public class Objective : MonoBehaviour
         return unitsInObjective.Count(u => u.teamID == teamID);
     }
 
+    public int GetEnemyCountOfTeam(BANDO teamID)
+    {
+        return unitsInObjective.Count(u => u.teamID != teamID);
+    }
+
     public System.Action<Objective> OnObjectiveCaptured;
+    public System.Action<Objective> OnObjectiveEntered;
 
 
 }

@@ -1,7 +1,9 @@
 using JetBrains.Annotations;
+using NUnit.Framework.Constraints;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
@@ -14,12 +16,13 @@ public class TacticalAI : MonoBehaviour
         TotalWar
     }
 
-    public enum OffensiveState
+    public enum AttackState
     {
         Gather,
         Attack,
         Retreat,
-        DefendContested
+        DefendContested,
+        Patrol
     }
 
     public readonly Dictionary<Strategy, float> attackPercentages = new Dictionary<Strategy, float>()
@@ -30,7 +33,7 @@ public class TacticalAI : MonoBehaviour
     };
 
 
-    private Strategy _currentStrategy;
+    public Strategy _currentStrategy;
     public Strategy CurrentStrategy
     {
         get { return _currentStrategy; }
@@ -39,12 +42,13 @@ public class TacticalAI : MonoBehaviour
             if (_currentStrategy != value)
             {
                 _currentStrategy = value;
+                UpdateOrders();
                 updateGroups(); // Actualizamos los grupos cada vez que cambiamos de estrategia para ajustar el tamaño de los grupos de ataque y defensa
             }
         }
     }
-    
-    public OffensiveState currentOffensiveState;
+
+    public AttackState currentAttackState;
 
     private int _currentDepth = -1;
 
@@ -71,14 +75,15 @@ public class TacticalAI : MonoBehaviour
     public GameObject gatherAttackPoint; // Punto de reunión para el grupo de ataque antes de atacar
     public (Unit, Objective)[] defendGroup;
 
+    private bool constructed = false;
     // Start is called before the first frame update
-    void Start()
+    public void Construct()
     {
         GameManager gm = GameManager.Instance;
         objectives = GameManager.Instance.Objectives;
         // Nos suscribimos al evento de captura de objetivo para actualizar el mapa táctico cada vez que se capture un objetivo)
         objectives.ForEach(list => list.ForEach(obj => obj.OnObjectiveCaptured += UpdateTacticalMapOnCaptureObjective));
-        
+
 
 
         // Si eres Rojo, le "das la vuelta al tablero"
@@ -96,8 +101,8 @@ public class TacticalAI : MonoBehaviour
             Debug.LogError("Bando Mal especificado");
         }
         // Los sanadores van por libre
-        availableUnits = units.Where(u => u.type != Unit.Type.Healer).Count(); 
-        
+        availableUnits = units.Where(u => u.type != Unit.Type.Healer).Count();
+
         // Crear objetivo dummy para el punto de reunión del grupo de ataque
         gatherAttackPoint = new GameObject("GatherAttackPoint");
         gatherAttackPoint.AddComponent<Objective>();
@@ -106,15 +111,26 @@ public class TacticalAI : MonoBehaviour
         gatherAttackPoint.GetComponent<BoxCollider>().size = new Vector3(5, 2, 5); // Tamaño del área de reunión
         gatherAttackPoint.transform.position = new Vector3(15, 1, 0); // NOTE: Posición temporal para pruebas.
         gatherAttackPoint.GetComponent<Objective>().debug = false;
+        gatherAttackPoint.GetComponent<Objective>().OnObjectiveEntered +=  _ => ObjectiveUpdate();
 
         updateTacticalMap();
         lastUpdate = Time.time;
 
-        updateGroups();        
-
+        updateGroups();
+        constructed = true;
     }
 
-   
+    private void ObjectiveUpdate()
+    {
+        UpdateAttackGroupOrders();
+    }
+
+    private void Start()
+    {
+        if (!constructed) Construct();
+    }
+
+
     // Update is called once per frame
     void Update()
     {
@@ -130,7 +146,7 @@ public class TacticalAI : MonoBehaviour
         }
     }
 
-    
+
     private bool updateTacticalMap()
     {
         // TOOD: Hacer para que no se creen nuevas listas cada vez, sino que se actualicen las mismas (para optimizar memoria)
@@ -175,7 +191,7 @@ public class TacticalAI : MonoBehaviour
             attackObjectives.Add(objective);
             defendObjectives.Remove(objective);
         }
-        else if (attackObjectives.Contains(objective))
+        else if (attackObjectives.Contains(objective) && objective.teamInControl ==teamID)
         {
             defendObjectives.Add(objective);
             attackObjectives.Remove(objective);
@@ -359,7 +375,7 @@ public class TacticalAI : MonoBehaviour
         List<(int index, Unit unit)> otherUnits = new List<(int, Unit)>();
 
         foreach (var (index, unit) in activeUnits)
-        {            
+        {
             Objective currentObjective = defendGroup[index].Item2;
             if (currentObjective == null || !defendObjectives.Contains(currentObjective))
             {
@@ -383,28 +399,195 @@ public class TacticalAI : MonoBehaviour
         BalanceGroup(defendObjectives, defendGroup, unitsToAssign);
     }
 
+    public Objective currentAttackObjective;
     /// <summary>
     /// Assigns attack group units to attack objectives. The attack has three states;
     /// </summary>
     private void UpdateAttackGroupOrders()
     {
-        // NOTE: Código para pruebas
-        foreach (var (unit, objective) in attackGroup)
+        bool flowControl = UpdateAttackState();
+        if (!flowControl)
         {
-            if (unit == null) continue;
-            // Si la unidad no tiene objetivo o su objetivo ya no es válido, le asignamos el punto de reunión para que se reúna con el grupo antes de atacar
-            if (objective == null)
+            Debug.LogWarning("No se han podido actualizar las órdenes del grupo de ataque, probablemente porque no hay objetivos de ataque disponibles.");
+            return;
+        }
+
+
+        flowControl = AttackStateAction();
+        if (!flowControl)
+        {
+            Debug.LogWarning("No se han podido asignar órdenes al grupo de ataque, probablemente porque no hay objetivos de ataque disponibles.");
+            return;
+        }
+
+        /*
+                // NOTE: Código para pruebas
+                foreach (var (unit, objective) in attackGroup)
+                {
+                    if (unit == null) continue;
+                    // Si la unidad no tiene objetivo o su objetivo ya no es válido, le asignamos el punto de reunión para que se reúna con el grupo antes de atacar
+                    if (objective == null)
+                    {
+                        for (int i = 0; i < attackGroup.Length; i++)
+                        {
+                            if (attackGroup[i].Item1 == unit)
+                            {
+                                attackGroup[i] = (unit, gatherAttackPoint.GetComponent<Objective>());
+                                break;
+                            }
+                        }
+                    }
+                }*/
+    }
+
+    private bool UpdateAttackState()
+    {
+        try
+        {
+            switch (_currentStrategy)
             {
+                case Strategy.Defensive:
+                    // NOTE: la estrategia para defensiva estándar tiene que ser patrullar por los objetivos de defensa.
+                    // Si el enemigo está conquistado una objetivo de defensa o está en disputa , el grupo de ataque se concentra en ese objetivo.
+                    if (defendObjectives.Any(obj => obj.isContested || obj.GetEnemyCountOfTeam(teamID) > 0))
+                        currentAttackState = AttackState.DefendContested;
+                    else
+                        currentAttackState = AttackState.Patrol;
+                    break;
+                case Strategy.Offensive:
+                    // NOTE: la estrategia para ofensiva será primero organizarse en el punto de reunión.
+                    // Cuando todas las unidades del grupo de ataque estén reunidas en el punto, se asigna un objetivo de ataque (el más cercano a la base) y se ataca.
+                    List<Unit> unitsInGatherPoint = gatherAttackPoint.GetComponent<Objective>().UnitsOfTeam(teamID);
+                    switch(currentAttackState)
+                    {
+                        case AttackState.Gather:
+                            // Si el grupo de ataque no está reunido, se mantiene en Gather
+                            if (attackGroup.All(pair => unitsInGatherPoint.Contains(pair.Item1)))
+                            {
+                                currentAttackState = AttackState.Attack; // Pasamos a atacar cuando todas las unidades del grupo de ataque se han reunido en el punto de reunión
+                            }
+                            break;
+                        case AttackState.Attack:
+                            // Si las al menos la mitad tienen poca vida. Las unidades muertas tienen poca vida.
+                            if ((attackGroup.Select(pair => pair.Item1).Count(unit => unit.IsHealLow()) > attackGroup.Length / 2))
+                            {
+                                currentAttackState = AttackState.Retreat; // Si el objetivo de ataque ya no es válido, volvemos a reunirnos para elegir un nuevo objetivo
+                                                                          // TODO: recolocar gatherpoint a un objetivo de defensa cercano
+                            }
+                            // Si se conquista el objetivo de ataque
+                            else if (currentAttackState == AttackState.Attack && currentAttackObjective != null && currentAttackObjective.teamInControl == teamID)
+                            {
+                                currentAttackState = AttackState.Gather; // Se vuelven a reunir 
+                                                                         // TODO: recolocar gatherpoint
+                            }
+                            break;
+                        case AttackState.Retreat:
+                            // Si el grupo de ataque se está retirando, pero al menos la mitad de las unidades están en el punto de reunión, se vuelve a reunir para elegir un nuevo objetivo de ataque
+                            if (currentAttackState == AttackState.Retreat && unitsInGatherPoint.Count >= attackGroup.Length / 2)
+                            {
+                                currentAttackState = AttackState.Gather; // Volvemos al estado de reunión cuando al menos la mitad de las unidades están en el punto de reunión
+                                                                         // TODO: recolocar gatherpoint
+                            }
+                            break;
+                        default:
+                            currentAttackState = AttackState.Gather; // Por defecto, el grupo de ataque se reúne antes de atacar
+                            break;
+                    }
+                    break;
+                case Strategy.TotalWar:
+                    // Si la estrategia es Total War, el grupo de ataque siempre está atacando, asignado a un objetivo de ataque válido (si no hay ninguno válido, se asigna el más cercano a la base)
+                    if (attackObjectives == null || attackObjectives.Count == 0) { 
+                        currentAttackState = AttackState.Gather; // Si no hay objetivos de ataque, el grupo de ataque se reúne para esperar a que haya objetivos disponibles
+                                                                 //TODO: recolocar gatherpoint a un objetivo de defensa cercano
+                    } else if (currentAttackState != AttackState.Attack)
+                        currentAttackState = AttackState.Attack; // En total war, el grupo de ataque siempre está atacando
+                    break;
+            }
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Error al actualizar el estado del grupo de ataque: {ex.Message}");
+            return false;
+        }
+    }
+
+    protected bool AttackStateAction()
+    {
+        switch (currentAttackState)
+        {
+            case AttackState.Gather:
+                // En el estado de Gather, todas las unidades del grupo de ataque se dirigen al punto de reunión para reunirse antes de atacar
                 for (int i = 0; i < attackGroup.Length; i++)
                 {
-                    if (attackGroup[i].Item1 == unit)
+                    if (attackGroup[i].Item1 != null && attackGroup[i].Item2 != gatherAttackPoint.GetComponent<Objective>())
                     {
-                        attackGroup[i] = (unit, gatherAttackPoint.GetComponent<Objective>());
-                        break;
+                        attackGroup[i].Item2 = gatherAttackPoint.GetComponent<Objective>();
                     }
                 }
-            }
+                break;
+            case AttackState.Attack:
+                // En el estado de Attack, asignamos a las unidades a los objetivos de ataque, priorizando las unidades sin objetivo o con objetivo no válido
+                if (attackObjectives == null || attackObjectives.Count == 0) return false;
+                if (currentAttackObjective == null || !attackObjectives.Contains(currentAttackObjective))
+                {
+                    // Si no hay objetivo de ataque asignado o el asignado ya no es válido, asignamos el más cercano a la base
+                    currentAttackObjective = attackObjectives.OrderBy(obj => Vector3.Distance(obj.transform.position, myBase.transform.position)).FirstOrDefault();
+                }
+
+                for (int i = 0; i < attackGroup.Length; i++)
+                {
+                    if (attackGroup[i].Item1 != null )//&& attackGroup[i].Item2 == gatherAttackPoint.GetComponent<Objective>())
+                    {
+                        attackGroup[i].Item2 = currentAttackObjective;
+                    }
+                }
+
+                break;
+            case AttackState.Retreat:
+                // En el estado de Retreat, todas las unidades del grupo de ataque se dirigen al objetivo más cercano dentro del territorio defendido para retirarse y reagruparse
+                // TODO: cambiar
+                for (int i = 0; i < attackGroup.Length; i++)
+                {
+                    if (attackGroup[i].Item1 != null)
+                    {
+                        Unit unit = attackGroup[i].Item1;
+                        Objective closestDefendObjective = defendObjectives.OrderBy(obj => Vector3.Distance(unit.agent.Position, obj.transform.position)).FirstOrDefault();
+                        if (closestDefendObjective != null)
+                        {
+                            attackGroup[i] = (unit, closestDefendObjective);
+                        }
+                    }
+                }
+                break;
+            case AttackState.DefendContested:
+                // En el estado de DefendContested, las unidades del grupo de ataque se asignan a defender los objetivos en disputa o que estén siendo conquistados por el enemigo dentro del territorio atacado
+                List<Objective> contestedObjectives = defendObjectives.Where(obj => obj.isContested || obj.GetEnemyCountOfTeam(teamID) > 0).OrderBy(obj => Vector3.Distance(obj.transform.position, myBase.transform.position)).ToList();
+                for (int i = 0; i < attackGroup.Length; i++)
+                {
+                    if (attackGroup[i].Item1 != null)
+                    {
+                        Objective o = contestedObjectives.ElementAtOrDefault(i % contestedObjectives.Count); // Asignamos de forma cíclica a los objetivos en disputa para repartir las unidades entre ellos
+                        if (o != null)
+                        {
+                            attackGroup[i].Item2 = o;
+                        }
+                    }
+                }
+                break;
+            case AttackState.Patrol:
+                for (int i = 0; i < attackGroup.Length; i++)
+                {
+                    if (attackGroup[i].Item1 != null && attackGroup[i].Item2 != gatherAttackPoint.GetComponent<Objective>())
+                    {
+                        attackGroup[i].Item2 = gatherAttackPoint.GetComponent<Objective>();
+                    }
+                }
+                break;
+
         }
+
+        return true;
     }
 
     private void BalanceGroup(List<Objective> objectivesSubGroup, (Unit, Objective)[] unitGroup, List<(int index, Unit unit)> unitsToAssign = null)
@@ -412,10 +595,10 @@ public class TacticalAI : MonoBehaviour
         List<int> unitsToAssign2 = new List<int>();
 
         List<int> objectiveUnitCounts = new List<int>(new int[objectivesSubGroup.Count]);
-        for( int i = 0; i < unitGroup.Length; i++)
+        for (int i = 0; i < unitGroup.Length; i++)
         {
             (Unit unit, Objective objective) = unitGroup[i];
-            if ( unit == null ) continue;
+            if (unit == null) continue;
             if (objective == null || !objectivesSubGroup.Contains(objective))
             {
                 unitsToAssign2.Add(i);
