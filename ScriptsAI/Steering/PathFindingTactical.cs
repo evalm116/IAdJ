@@ -114,7 +114,7 @@ public class PathFindingTactical : PathFollowing
 
     public override Steering GetSteering(AgentNPC character)
     {
-        if (!_pathSearched)
+        if (!_pathSearched || _path == null)
         {
             _path = _pathManager.FindPath(gameGrid.GetCellAt(character.Position));
             _pathSearched = true;

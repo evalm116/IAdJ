@@ -56,7 +56,7 @@ public class GameManager : MonoBehaviour
         tacticalAIBlue = gameObject.AddComponent<TacticalAI>();
         tacticalAIBlue.teamID = BANDO.Blue;
         tacticalAIBlue.Construct();
-        tacticalAIBlue.CurrentStrategy = TacticalAI.Strategy.Offensive;
+        tacticalAIBlue.CurrentStrategy = TacticalAI.Strategy.Defensive;
         tacticalAIBlue.currentAttackState = TacticalAI.AttackState.Gather;
 
         tacticalAIRed = gameObject.AddComponent<TacticalAI>();

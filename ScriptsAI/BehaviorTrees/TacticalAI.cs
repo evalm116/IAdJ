@@ -142,6 +142,7 @@ public class TacticalAI : MonoBehaviour
             {
                 return;
             }
+            UpdateOrders();
             lastUpdate = Time.time;
         }
     }
@@ -576,15 +577,25 @@ public class TacticalAI : MonoBehaviour
                 }
                 break;
             case AttackState.Patrol:
+                // La unidad va a patrullar por los objetivos de defensa.
                 for (int i = 0; i < attackGroup.Length; i++)
                 {
-                    if (attackGroup[i].Item1 != null && attackGroup[i].Item2 != gatherAttackPoint.GetComponent<Objective>())
+                    // Si unidad no asignada continuamos
+                    if (attackGroup[i].Item1 == null) continue;
+                    // Asignamos primer objetivo si unidad no tiene objetivo asignado o si el
+                    // objetivo no está en los objetivos de defensa.
+                    if (attackGroup[i].Item2 == null || !defendObjectives.Contains(attackGroup[i].Item2))
                     {
-                        attackGroup[i].Item2 = gatherAttackPoint.GetComponent<Objective>();
+                        attackGroup[i].Item2 = defendObjectives[0];
+                    }
+                    // Actualizamos si la unidad se encuentra dentro del punto
+                    else if (attackGroup[i].Item2.GetUnitsInObjective().Contains(attackGroup[i].Item1))
+                    {
+                        int index = (defendObjectives.IndexOf(attackGroup[i].Item2) + 1) % defendObjectives.Count;
+                        attackGroup[i].Item2 = defendObjectives[index];
                     }
                 }
                 break;
-
         }
 
         return true;
