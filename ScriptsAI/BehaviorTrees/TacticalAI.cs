@@ -43,7 +43,7 @@ public class TacticalAI : MonoBehaviour
             {
                 _currentStrategy = value;
                 UpdateOrders();
-                updateGroups(); // Actualizamos los grupos cada vez que cambiamos de estrategia para ajustar el tamaño de los grupos de ataque y defensa
+                UpdateGroups(); // Actualizamos los grupos cada vez que cambiamos de estrategia para ajustar el tamaño de los grupos de ataque y defensa
             }
         }
     }
@@ -111,12 +111,12 @@ public class TacticalAI : MonoBehaviour
         gatherAttackPoint.GetComponent<BoxCollider>().size = new Vector3(5, 2, 5); // Tamaño del área de reunión
         gatherAttackPoint.transform.position = new Vector3(15, 1, 0); // NOTE: Posición temporal para pruebas.
         gatherAttackPoint.GetComponent<Objective>().debug = false;
-        gatherAttackPoint.GetComponent<Objective>().OnObjectiveEntered +=  _ => ObjectiveUpdate();
+        gatherAttackPoint.GetComponent<Objective>().OnObjectiveEntered += _ => ObjectiveUpdate();
 
-        updateTacticalMap();
+        UpdateTacticalMap();
         lastUpdate = Time.time;
 
-        updateGroups();
+        UpdateGroups();
         constructed = true;
     }
 
@@ -137,18 +137,22 @@ public class TacticalAI : MonoBehaviour
         // Limitamos ratio de actualización para no hacer cálculos innecesarios
         if (Time.time - lastUpdate >= UPDATE_INTERVAL)
         {
-            bool flowControl = updateTacticalMap();
+            bool flowControl = UpdateTacticalMap();
             if (!flowControl)
             {
                 return;
             }
+            flowControl = UpdateGroups();
+            if (!flowControl) return;
+
             UpdateOrders();
+
             lastUpdate = Time.time;
         }
     }
 
 
-    private bool updateTacticalMap()
+    private bool UpdateTacticalMap()
     {
         // TOOD: Hacer para que no se creen nuevas listas cada vez, sino que se actualicen las mismas (para optimizar memoria)
 
@@ -181,7 +185,7 @@ public class TacticalAI : MonoBehaviour
             defendObjectives = new List<Objective>(objectives[defendIndex]);
         }
         attackIndex = depth + 1;
-        attackObjectives = new List<Objective>(objectives[attackIndex].Where(obj => obj.teamInControl != teamID));
+        attackObjectives = (attackIndex > objectives.Count) ? new List<Objective>() : new List<Objective>(objectives[attackIndex].Where(obj => obj.teamInControl != teamID));
         return true;
     }
 
@@ -192,13 +196,13 @@ public class TacticalAI : MonoBehaviour
             attackObjectives.Add(objective);
             defendObjectives.Remove(objective);
         }
-        else if (attackObjectives.Contains(objective) && objective.teamInControl ==teamID)
+        else if (attackObjectives.Contains(objective) && objective.teamInControl == teamID)
         {
             defendObjectives.Add(objective);
             attackObjectives.Remove(objective);
         }
 
-        updateTacticalMap();
+        UpdateTacticalMap();
         UpdateOrders();
     }
 
@@ -218,9 +222,16 @@ public class TacticalAI : MonoBehaviour
     /// Crea grupos de ataque y defensa dependiendo de la estrategia actual.
     /// </summary>
     /// <returns>Actualización realizada con éxito o no</returns>
-    private bool updateGroups()
+    private bool UpdateGroups()
     {
         int attackGroupSize = Mathf.RoundToInt(availableUnits * attackPercentages[CurrentStrategy]);
+
+        // Si los grupos ya tienen los tamaños designados no hay que actualizarlos
+        if (attackGroup != null && attackGroupSize == attackGroup.Length &&
+            defendGroup != null && defendGroup.Length == availableUnits - attackGroupSize)
+            return true;
+
+
         (Unit, Objective)[] newAttackGroup = new (Unit, Objective)[attackGroupSize];
         (Unit, Objective)[] newDefendGroup = new (Unit, Objective)[availableUnits - attackGroupSize];
 
@@ -256,12 +267,33 @@ public class TacticalAI : MonoBehaviour
             }
         }
 
-        if (diffAttack > 0)
+        if (CurrentStrategy == Strategy.TotalWar)
+        {
+            int index = 0;
+            foreach ((Unit u, Objective o) in attackGroup)
+            {
+                if (u != null)
+                {
+                    newAttackGroup[index] = (u, o);
+                    index++;
+                }
+            }
+
+            foreach ((Unit u, Objective o) in defendGroup)
+            {
+                if (u != null)
+                {
+                    newAttackGroup[index] = (u, o);
+                    index++;
+                }
+            }
+        }
+        else if (diffAttack > 0)
         {
             for (int i = 0; i < diffAttack; i++)
             {
                 // Pasamos unidades del grupo de defensa al de ataque
-                if (defendGroup.Length - 1 - i >= 0)
+                if (defendGroup.Length - 1 - i >= 0 && defendGroup.Length - 1 - i < newDefendGroup.Length)
                 {
                     newAttackGroup[attackGroupSize - 1 - i] = defendGroup[defendGroup.Length - 1 - i];
                     newDefendGroup[defendGroup.Length - 1 - i] = (null, null);
@@ -280,6 +312,9 @@ public class TacticalAI : MonoBehaviour
                 }
             }
         }
+
+        attackGroup = newAttackGroup;
+        defendGroup = newDefendGroup;
 
         return true;
     }
@@ -302,8 +337,6 @@ public class TacticalAI : MonoBehaviour
             array[k] = temp;
         }
     }
-
-
     public bool hasOrders(Unit unit)
     {
         return (attackGroup.Any(pair => pair.Item1 == unit) || defendGroup.Any(pair => pair.Item1 == unit));
@@ -459,18 +492,19 @@ public class TacticalAI : MonoBehaviour
                     // NOTE: la estrategia para ofensiva será primero organizarse en el punto de reunión.
                     // Cuando todas las unidades del grupo de ataque estén reunidas en el punto, se asigna un objetivo de ataque (el más cercano a la base) y se ataca.
                     List<Unit> unitsInGatherPoint = gatherAttackPoint.GetComponent<Objective>().UnitsOfTeam(teamID);
-                    switch(currentAttackState)
+                    switch (currentAttackState)
                     {
                         case AttackState.Gather:
                             // Si el grupo de ataque no está reunido, se mantiene en Gather
-                            if (attackGroup.All(pair => unitsInGatherPoint.Contains(pair.Item1)))
+                            if (attackGroup.All(pair => pair.Item1 != null && unitsInGatherPoint.Contains(pair.Item1)))
                             {
                                 currentAttackState = AttackState.Attack; // Pasamos a atacar cuando todas las unidades del grupo de ataque se han reunido en el punto de reunión
                             }
                             break;
                         case AttackState.Attack:
                             // Si las al menos la mitad tienen poca vida. Las unidades muertas tienen poca vida.
-                            if ((attackGroup.Select(pair => pair.Item1).Count(unit => unit.IsHealLow()) > attackGroup.Length / 2))
+                            if (attackGroup != null &&
+                                (attackGroup.Select(pair => pair.Item1).Count(unit => unit != null && unit.IsHealLow()) > attackGroup.Length / 2))
                             {
                                 currentAttackState = AttackState.Retreat; // Si el objetivo de ataque ya no es válido, volvemos a reunirnos para elegir un nuevo objetivo
                                                                           // TODO: recolocar gatherpoint a un objetivo de defensa cercano
@@ -497,10 +531,12 @@ public class TacticalAI : MonoBehaviour
                     break;
                 case Strategy.TotalWar:
                     // Si la estrategia es Total War, el grupo de ataque siempre está atacando, asignado a un objetivo de ataque válido (si no hay ninguno válido, se asigna el más cercano a la base)
-                    if (attackObjectives == null || attackObjectives.Count == 0) { 
+                    if (attackObjectives == null || attackObjectives.Count == 0)
+                    {
                         currentAttackState = AttackState.Gather; // Si no hay objetivos de ataque, el grupo de ataque se reúne para esperar a que haya objetivos disponibles
                                                                  //TODO: recolocar gatherpoint a un objetivo de defensa cercano
-                    } else if (currentAttackState != AttackState.Attack)
+                    }
+                    else if (currentAttackState != AttackState.Attack)
                         currentAttackState = AttackState.Attack; // En total war, el grupo de ataque siempre está atacando
                     break;
             }
@@ -533,12 +569,20 @@ public class TacticalAI : MonoBehaviour
                 if (currentAttackObjective == null || !attackObjectives.Contains(currentAttackObjective))
                 {
                     // Si no hay objetivo de ataque asignado o el asignado ya no es válido, asignamos el más cercano a la base
-                    currentAttackObjective = attackObjectives.OrderBy(obj => Vector3.Distance(obj.transform.position, myBase.transform.position)).FirstOrDefault();
+                    var emptyObjectives = attackObjectives.Where(x => x.teamInControl == BANDO.None);
+                    if (emptyObjectives.Count(_ => true) > 0)
+                    {
+                        currentAttackObjective = emptyObjectives.OrderBy(obj => Vector3.Distance(obj.transform.position, myBase.transform.position)).FirstOrDefault();
+                    }
+                    else
+                    {
+                        currentAttackObjective = attackObjectives.OrderBy(obj => Vector3.Distance(obj.transform.position, myBase.transform.position)).FirstOrDefault();
+                    }
                 }
 
                 for (int i = 0; i < attackGroup.Length; i++)
                 {
-                    if (attackGroup[i].Item1 != null )//&& attackGroup[i].Item2 == gatherAttackPoint.GetComponent<Objective>())
+                    if (attackGroup[i].Item1 != null)//&& attackGroup[i].Item2 == gatherAttackPoint.GetComponent<Objective>())
                     {
                         attackGroup[i].Item2 = currentAttackObjective;
                     }
@@ -686,10 +730,23 @@ public class TacticalAI : MonoBehaviour
 
         Vector3 GetTargetPosition(Unit unit, (Unit, Objective)[] group)
         {
+            Grid grid = GameManager.Instance.GameGrid;
             Objective obj = group.First(pair => pair.Item1 == unit).Item2;
             //if (zoneCollider.bounds.Contains(targetRB.position))
             if (obj.IsUnitInside(unit))
-                position = obj.GetRandomPosition();
+            {
+                int i = 0;
+                do
+                {
+                    position = obj.GetRandomPosition();
+                    i++;
+                    if (i > 15)
+                    {
+                        Debug.LogError("No se encontró posición random válida del objetivo dentro del grid. Grid mayormente/completamente fuera del grid o muy mala suerte.");
+                        return Vector3.zero;
+                    }
+                } while (!grid.IsInside(position) || !grid.GetCellAt(position).isWalkable);
+            }                
             else
                 position = obj.transform.position;
 

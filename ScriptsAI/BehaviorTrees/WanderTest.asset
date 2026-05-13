@@ -64,12 +64,12 @@ MonoBehaviour:
     cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree id=\"0\" />\r\n         
     <PrioritySelectorNode id=\"11\" />\r\n          <RepeatDecorator id=\"9\" />\r\n       
     </data>\r\n      </_data>\r\n    </PrioritySelectorNode>\r\n    <ConditionEvalNode
-    id=\"13\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"True\"
+    id=\"13\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
     position=\"349.6064 979.0159\" name=\"AlwaysTrue\" description=\"Eval\" cardinality=\"1\"
     hasParent=\"True\">\r\n          <BehaviorTree id=\"0\" />\r\n          <ConditionEvalNode
     id=\"13\" />\r\n          <PrioritySelectorNode id=\"11\" />\r\n        </data>\r\n     
     </_data>\r\n    </ConditionEvalNode>\r\n    <ActionNode id=\"8\">\r\n      <_data>\r\n       
-    <data breakpoint=\"0\" selected=\"False\" position=\"158.7902 723.6708\" name=\"IADJ/GoToPoint\"
+    <data breakpoint=\"0\" selected=\"True\" position=\"158.7902 723.6708\" name=\"IADJ/GoToPoint\"
     description=\"Uses pathFinding to go to a specified point\" cardinality=\"0\"
     hasParent=\"False\">\r\n          <BehaviorTree id=\"8\" />\r\n        </data>\r\n     
     </_data>\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"15\">\r\n      <_data>\r\n       

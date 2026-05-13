@@ -186,23 +186,28 @@ public class Objective : MonoBehaviour
 
     public List<Unit> UnitsOfTeam(BANDO teamID)
     {
+        if (unitsInObjective == null) return new List<Unit>();
         return unitsInObjective.Where(u => u.teamID == teamID).ToList();
     }
 
     public List<Unit> GetUnitsInObjective()
     {
+        if (unitsInObjective == null) return new List<Unit>();
         return new List<Unit>(unitsInObjective);
     }
 
     public int GetUnitCountOfTeam(BANDO teamID)
     {
+        if (unitsInObjective == null) return 0;
         return unitsInObjective.Count(u => u.teamID == teamID);
     }
 
     public int GetEnemyCountOfTeam(BANDO teamID)
     {
+        if (unitsInObjective == null) return 0;
         return unitsInObjective.Count(u => u.teamID != teamID);
     }
+
 
     public System.Action<Objective> OnObjectiveCaptured;
     public System.Action<Objective> OnObjectiveEntered;

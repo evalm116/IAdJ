@@ -271,4 +271,9 @@ public class Grid : MonoBehaviour
         // Si no golpea nada o el componente falta, devuelve un tipo seguro.
         return TipoTerreno.Plain;
     }
+
+    public bool IsInside(Vector3 position)
+    {
+        return PosicionValida(GetGridPosition(position));
+    }
 }
