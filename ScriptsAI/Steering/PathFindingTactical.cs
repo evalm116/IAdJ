@@ -114,9 +114,10 @@ public class PathFindingTactical : PathFollowing
 
     public override Steering GetSteering(AgentNPC character)
     {
-        if (_objective == null || !gameGrid.isInside(_objective.position))
+        if (_objective == null || !gameGrid.IsInside(_objective.position))
         {
-
+            Debug.LogError("Objetivo no puesto o fuera del grid");
+            return null;
         }
         if (!_pathSearched || _path == null)
         {
