@@ -2,7 +2,6 @@ using UnityEngine;
 
 public enum TipoTerreno
 {
-    Road,
     Plain,
     Desert,
     Forest,

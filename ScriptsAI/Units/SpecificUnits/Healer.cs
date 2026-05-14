@@ -24,8 +24,8 @@ public class Healer : Unit
             return false;
         }
 
-        if (target.teamID != this.teamID || target.health >= target.maxHealth)
-            return false; // No puede sanar unidades enemigas o unidades con salud completa
+        if (target.teamID != this.teamID)
+            return false; // No puede sanar unidades enemigas
 
         // Se mantiene por no dejar AttackTarget vacio
         int healing = AttackTarget(target);

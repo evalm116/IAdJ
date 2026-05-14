@@ -44,15 +44,9 @@ public class Grid : MonoBehaviour
             }
 
             // Corrección desde origen (centrar grid)
-            origenGrid = origenGrid - new Vector3(columnas * cellSize, 0, filas * cellSize) * 0.5f;
+            origenGrid = origenGrid - new Vector3(columnas * cellSize, 0, columnas * cellSize) * 0.5f;
             Debug.Log($"Origen del grid: {origenGrid}");
             transform.position = origenGrid;
-
-            // Debug para ver tipo de terreno
-            Debug.Log($"Floor size detectado: {floorSize}");
-            Debug.Log($"Floor collider: {floor.GetComponent<Collider>()}");
-            Debug.Log($"Floor renderer: {floor.GetComponent<Renderer>()}");
-            Debug.Log($"Floor scale: {floor.transform.localScale}");
         }
 
         gridArray = new GridCell[columnas, filas];
@@ -195,9 +189,6 @@ public class Grid : MonoBehaviour
                 }
             }
         }
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(transform.position, 0.3f); // esquina origen (0,0)
-        Gizmos.DrawSphere(GetCellCenter(columnas - 1, filas - 1), 0.3f); // esquina opuesta
     }
 
 
@@ -211,12 +202,12 @@ public class Grid : MonoBehaviour
         return x >= 0 && x < columnas && z >= 0 && z < filas;
     }
 
-    public GridCell GetCellAt(Vector3 position, bool logError = false)
+    public GridCell GetCellAt(Vector3 position)
     {
         Vector2Int cellPosition = GetGridPosition(position);
         if (!PosicionValida(cellPosition))
         {
-            if (logError) Debug.LogError($"Posición ({cellPosition.x}, {cellPosition.y}) fuera de límites.");
+            Debug.LogError($"Posición de celda ({cellPosition.x}, {cellPosition.y}) fuera de los límites del grid.");
             return null;
         }
         return gridArray[cellPosition.x, cellPosition.y];
@@ -234,29 +225,22 @@ public class Grid : MonoBehaviour
 
     private Vector3 GetFloorSize(GameObject floor)
     {
-        Terrain terrain = floor.GetComponent<Terrain>();
-        if (terrain != null) return terrain.terrainData.size;
-
-        // Combinar bounds de todos los renderers hijos
-        Renderer[] renderers = floor.GetComponentsInChildren<Renderer>();
-        if (renderers.Length > 0)
+        // Intentar obtener tamaño desde Collider
+        Collider col = floor.GetComponent<Collider>();
+        if (col != null)
         {
-            Bounds combined = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++)
-                combined.Encapsulate(renderers[i].bounds);
-            return combined.size;
+            return col.bounds.size;
         }
 
-        // Combinar bounds de todos los colliders hijos
-        Collider[] colliders = floor.GetComponentsInChildren<Collider>();
-        if (colliders.Length > 0)
+        // Intentar obtener tamaño desde Renderer
+        Renderer rend = floor.GetComponent<Renderer>();
+        if (rend != null)
         {
-            Bounds combined = colliders[0].bounds;
-            for (int i = 1; i < colliders.Length; i++)
-                combined.Encapsulate(colliders[i].bounds);
-            return combined.size;
+            return rend.bounds.size;
         }
 
+        // Fallback: usar escala del transform
+        // Asumimos que un plano por defecto de Unity es 10x10 unidades con scale (1,1,1)
         Vector3 scale = floor.transform.localScale;
         return new Vector3(scale.x * 10f, scale.y, scale.z * 10f);
     }
@@ -288,9 +272,9 @@ public class Grid : MonoBehaviour
         return TipoTerreno.Plain;
     }
 
-    public bool IsInside(Vector3 position)
+    public bool IsInside(Vector3 worldPosition)
     {
-        return PosicionValida(GetGridPosition(position));
+        Vector2Int pos = GetGridPosition(worldPosition);
+        return PosicionValida(pos);
     }
-
 }
