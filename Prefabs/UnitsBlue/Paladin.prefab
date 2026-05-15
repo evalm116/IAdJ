@@ -49,8 +49,6 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -75,7 +73,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 4ec4ac9dcf69af048b53458254dd20dd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 76088d3b32d6330499bb7b71821c3ff2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -135,8 +133,8 @@ GameObject:
   - component: {fileID: 1545738505178373603}
   - component: {fileID: 8703482797236968167}
   - component: {fileID: 1537317735483196517}
-  - component: {fileID: 7814100102537126664}
   - component: {fileID: 5360584055323819079}
+  - component: {fileID: 3160099949247454321}
   m_Layer: 0
   m_Name: Paladin
   m_TagString: Untagged
@@ -336,22 +334,7 @@ MonoBehaviour:
     quaternionParams: []
     quaternionParamsNames: []
     quaternionParamsLostDefaultValue: 
---- !u!114 &7814100102537126664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1032620198039978210}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4063b20472d106a4e86a8e44c31cb07d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iconOffensive: {fileID: 5341937378483743633}
-  iconDefensive: {fileID: 5135155023847837517}
-  iconTotalWar: {fileID: 811793944667969778}
-  iconHealer: {fileID: 8319636623483712346}
+  startTime: 0
 --- !u!114 &5360584055323819079
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -364,6 +347,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0a53d6ffc20c9640951d85622851ec7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3160099949247454321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1032620198039978210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2acfed8d5eb897d48a22a65ea0c3ad2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iconOffensive: {fileID: 5341937378483743633}
+  iconDefensive: {fileID: 5135155023847837517}
+  iconTotalWar: {fileID: 811793944667969778}
+  iconHealer: {fileID: 8319636623483712346}
 --- !u!1 &1093501372187044479
 GameObject:
   m_ObjectHideFlags: 0
@@ -573,8 +572,6 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -666,8 +663,6 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -692,7 +687,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 1c7cde251c497d3409c32f6895504e64, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 601fe8d9c53ac4547ac0470801e61e47, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -752,8 +747,6 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -778,7 +771,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: d0f3b5a9042b5aa4a9679642f42547aa, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 57725b69a228bee4ea4f717e050d0f92, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -934,8 +927,6 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -960,7 +951,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: f657594b81bc73e40a6d29d0fe95b594, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a7ee5fcdf7fffa7469a0991d8dfde4f0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

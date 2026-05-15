@@ -84,8 +84,6 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -110,7 +108,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: d0f3b5a9042b5aa4a9679642f42547aa, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 57725b69a228bee4ea4f717e050d0f92, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -170,8 +168,6 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -196,7 +192,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 4ec4ac9dcf69af048b53458254dd20dd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 76088d3b32d6330499bb7b71821c3ff2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -256,8 +252,6 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -282,7 +276,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: f657594b81bc73e40a6d29d0fe95b594, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a7ee5fcdf7fffa7469a0991d8dfde4f0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -342,8 +336,6 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -368,7 +360,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 1c7cde251c497d3409c32f6895504e64, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 601fe8d9c53ac4547ac0470801e61e47, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -393,8 +385,8 @@ GameObject:
   - component: {fileID: 4089305406909455817}
   - component: {fileID: 6496743422116735852}
   - component: {fileID: 9133672453266174744}
-  - component: {fileID: 801197645141189770}
   - component: {fileID: 4577191083168085433}
+  - component: {fileID: 6021292837366515789}
   m_Layer: 0
   m_Name: Cleric
   m_TagString: Untagged
@@ -594,22 +586,7 @@ MonoBehaviour:
     quaternionParams: []
     quaternionParamsNames: []
     quaternionParamsLostDefaultValue: 
---- !u!114 &801197645141189770
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5077830441291582328}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4063b20472d106a4e86a8e44c31cb07d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iconOffensive: {fileID: 2720355424948037531}
-  iconDefensive: {fileID: 4632257875746757461}
-  iconTotalWar: {fileID: 3281020854968202746}
-  iconHealer: {fileID: 3756521747002151465}
+  startTime: 0
 --- !u!114 &4577191083168085433
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -622,6 +599,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0a53d6ffc20c9640951d85622851ec7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6021292837366515789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5077830441291582328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2acfed8d5eb897d48a22a65ea0c3ad2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iconOffensive: {fileID: 2720355424948037531}
+  iconDefensive: {fileID: 4632257875746757461}
+  iconTotalWar: {fileID: 3281020854968202746}
+  iconHealer: {fileID: 3756521747002151465}
 --- !u!1001 &7734098662047525375
 PrefabInstance:
   m_ObjectHideFlags: 0
