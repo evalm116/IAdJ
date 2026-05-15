@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 791740077145332491}
   - component: {fileID: 3567838503956621212}
   - component: {fileID: 4089305406909455817}
+  - component: {fileID: 6496743422116735852}
   - component: {fileID: 9133672453266174744}
   m_Layer: 0
   m_Name: Cleric
@@ -116,6 +117,37 @@ MonoBehaviour:
     angular: 0
     linear: {x: 0, y: 0, z: 0}
   currentType: 0
+--- !u!114 &6496743422116735852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5077830441291582328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58b676a4e7cf6da4289695f8d6c29896, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damageTextPrefab: {fileID: 1468346357747388829, guid: baa4f9d4b75667e4a91dee986b808130, type: 3}
+  healingTextPrefab: {fileID: 1468346357747388829, guid: 4a54a149cd4476f449e92cda698db537, type: 3}
+  respawnTime: 3
+  agent: {fileID: 0}
+  type: 1
+  teamID: 0
+  maxHealth: 0
+  health: 0
+  attack: 0
+  magicAttack: 0
+  physicalDefense: 0
+  magicDefense: 0
+  dodge: 0
+  range: 0
+  debugMode: 0
+  attackCooldown: 1
+  _isDead: 0
+  seekTarget: {fileID: 0}
+  weight: 1
 --- !u!114 &9133672453266174744
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180,6 +212,7 @@ MonoBehaviour:
     quaternionParams: []
     quaternionParamsNames: []
     quaternionParamsLostDefaultValue: 
+  startTime: 0
 --- !u!1001 &7734098662047525375
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -188,6 +221,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4375581210280011285}
     m_Modifications:
+    - target: {fileID: 7724817569873750491, guid: f0a83fd91b738bd49a048c02ed8ec6f9, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 83bdab7f727708b48ad3cfc40c47a031, type: 2}
     - target: {fileID: 8352345220699606587, guid: f0a83fd91b738bd49a048c02ed8ec6f9, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
