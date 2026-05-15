@@ -120,7 +120,7 @@ public class TacticalAI : MonoBehaviour
         gatherAttackPoint.AddComponent<BoxCollider>();
         gatherAttackPoint.GetComponent<BoxCollider>().isTrigger = true;
         gatherAttackPoint.GetComponent<BoxCollider>().size = new Vector3(5, 2, 5); // Tamaño del área de reunión
-        gatherAttackPoint.transform.position = new Vector3(15, 1, 0); // NOTE: Posición temporal para pruebas.
+        gatherAttackPoint.transform.position = myBase.transform.position; // NOTE: Posición temporal para pruebas.
         gatherAttackPoint.GetComponent<Objective>().debug = false;
         gatherAttackPoint.GetComponent<Objective>().OnObjectiveEntered += _ => ObjectiveUpdate();
 
@@ -518,13 +518,15 @@ public class TacticalAI : MonoBehaviour
                                 (attackGroup.Select(pair => pair.Item1).Count(unit => unit != null && unit.IsHealLow()) > attackGroup.Length / 2))
                             {
                                 currentAttackState = AttackState.Retreat; // Si el objetivo de ataque ya no es válido, volvemos a reunirnos para elegir un nuevo objetivo
-                                                                          // TODO: recolocar gatherpoint a un objetivo de defensa cercano
+
+                                // Recolocamos gatherPoint en objetivo defensivo más cercano.
+                                gatherAttackPoint.transform.position = GetClosestFiendlyObjective();
                             }
                             // Si se conquista el objetivo de ataque
                             else if (currentAttackState == AttackState.Attack && currentAttackObjective != null && currentAttackObjective.teamInControl == teamID)
                             {
                                 currentAttackState = AttackState.Gather; // Se vuelven a reunir 
-                                                                         // TODO: recolocar gatherpoint
+                                gatherAttackPoint.transform.position = currentAttackObjective.transform.position; // recolocar gatherpoint
                             }
                             break;
                         case AttackState.Retreat:
@@ -532,7 +534,7 @@ public class TacticalAI : MonoBehaviour
                             if (currentAttackState == AttackState.Retreat && unitsInGatherPoint.Count >= attackGroup.Length / 2)
                             {
                                 currentAttackState = AttackState.Gather; // Volvemos al estado de reunión cuando al menos la mitad de las unidades están en el punto de reunión
-                                                                         // TODO: recolocar gatherpoint
+                                gatherAttackPoint.transform.position = GetClosestFiendlyObjective();
                             }
                             break;
                         default:
@@ -544,8 +546,10 @@ public class TacticalAI : MonoBehaviour
                     // Si la estrategia es Total War, el grupo de ataque siempre está atacando, asignado a un objetivo de ataque válido (si no hay ninguno válido, se asigna el más cercano a la base)
                     if (attackObjectives == null || attackObjectives.Count == 0)
                     {
-                        currentAttackState = AttackState.Gather; // Si no hay objetivos de ataque, el grupo de ataque se reúne para esperar a que haya objetivos disponibles
-                                                                 //TODO: recolocar gatherpoint a un objetivo de defensa cercano
+                        // Si no hay objetivos de ataque, el grupo de ataque se reúne para esperar a que haya objetivos disponibles
+                        // Esto solo debe ocurrir si se ejecuta sin querer al principio o se peta fuerte.
+                        currentAttackState = AttackState.Gather; 
+                        gatherAttackPoint.transform.position = GetClosestFiendlyObjective();
                     }
                     else if (currentAttackState != AttackState.Attack)
                         currentAttackState = AttackState.Attack; // En total war, el grupo de ataque siempre está atacando
@@ -557,6 +561,22 @@ public class TacticalAI : MonoBehaviour
         {
             Debug.LogError($"Error al actualizar el estado del grupo de ataque: {ex.Message}");
             return false;
+        }
+
+        Vector3 GetClosestFiendlyObjective()
+        {
+            Unit u = attackGroup.Select(pair => pair.Item1).Where(u => !u._isDead).First();
+            if (u != null)
+                return defendObjectives.OrderBy(obj => Vector3.Distance(obj.transform.position, u.getPosition())).First().transform.position;
+            
+            if (defendObjectives == null || defendObjectives.Count == 0)
+            {
+                Debug.LogError("DefendObjectives vacio en tacticalAI");
+                return Vector3.zero;
+            }   
+
+            return defendObjectives.First().transform.position;
+
         }
     }
 
