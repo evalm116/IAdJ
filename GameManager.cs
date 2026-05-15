@@ -172,4 +172,10 @@ public class GameManager : MonoBehaviour
         return Vector3.zero;
     }
 
+    public TacticalAI.Strategy GetStrategy(Unit u)
+    {
+        TacticalAI a = (u.teamID == BANDO.Blue) ? tacticalAIBlue : tacticalAIRed;
+        return a.CurrentStrategy;
+    }
+
 }

@@ -48,9 +48,15 @@ public class TacticalAI : MonoBehaviour
         }
     }
     /*
+     * 
      * public void ChangeBlueStrategy(Strategy s){
      *         tacticalAIBLUE.CurrentStrategy = s;
      * }
+     * 
+     * public void ChangeRedStrategy(Strategy s){
+     *         tacticalAIRed.CurrentStrategy = s;
+     * }
+     * 
      * */
 
     public AttackState currentAttackState;

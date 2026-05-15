@@ -176,12 +176,11 @@ public class Objective : MonoBehaviour
 
     internal Vector3 GetRandomPosition()
     {
-        var a = new Vector3(
+        return new Vector3(
             UnityEngine.Random.Range(col.bounds.min.x, col.bounds.max.x),
             0,
             UnityEngine.Random.Range(col.bounds.min.z, col.bounds.max.z)
         );
-        return a;
     }
 
     public List<Unit> UnitsOfTeam(BANDO teamID)
