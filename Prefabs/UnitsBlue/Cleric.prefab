@@ -134,7 +134,7 @@ MonoBehaviour:
   respawnTime: 3
   agent: {fileID: 0}
   type: 1
-  teamID: 0
+  teamID: 2
   maxHealth: 0
   health: 0
   attack: 0
