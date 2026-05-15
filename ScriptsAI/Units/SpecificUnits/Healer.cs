@@ -48,7 +48,7 @@ public class Healer : Unit
 
     private void Awake()
     {
-        this.type = Type.Healer;
+        this.type = Type.Cleric;
     }
 
 }

@@ -24,13 +24,11 @@ public abstract class Unit : MonoBehaviour
 
     public enum Type
     {
-        Heavy,
-        Light,
-        Cavalry,
-        Archer,
-        Wizard,
-        Guerrilla,
-        Healer
+        Paladin, 
+        Cleric, 
+        Rogue, 
+        Wizard, 
+        Ranger
     };
 
     public AgentNPC agent;

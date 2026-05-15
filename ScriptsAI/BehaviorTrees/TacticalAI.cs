@@ -47,6 +47,11 @@ public class TacticalAI : MonoBehaviour
             }
         }
     }
+    /*
+     * public void ChangeBlueStrategy(Strategy s){
+     *         tacticalAIBLUE.CurrentStrategy = s;
+     * }
+     * */
 
     public AttackState currentAttackState;
 
@@ -101,7 +106,7 @@ public class TacticalAI : MonoBehaviour
             Debug.LogError("Bando Mal especificado");
         }
         // Los sanadores van por libre
-        availableUnits = units.Where(u => u.type != Unit.Type.Healer).Count();
+        availableUnits = units.Where(u => u.type != Unit.Type.Cleric).Count();
 
         // Crear objetivo dummy para el punto de reunión del grupo de ataque
         gatherAttackPoint = new GameObject("GatherAttackPoint");

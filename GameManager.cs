@@ -19,6 +19,10 @@ public class GameManager : MonoBehaviour
     private TacticalAI tacticalAIBlue;
     private TacticalAI tacticalAIRed;
 
+    public InfluenceMap redInfluence;
+    public InfluenceMap blueInfluence;
+    public InfluenceMapManager influenceManager;
+
     public static GameManager Instance { get; private set; }
     public Grid GameGrid { get; private set; }
 
