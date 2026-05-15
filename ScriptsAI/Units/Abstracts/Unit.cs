@@ -50,7 +50,7 @@ public abstract class Unit : MonoBehaviour
     public int physicalDefense;
     public int magicDefense;
     public float dodge;
-    public event Action<Unit> OnUnitDisabled;
+
     public double range;
 
     public bool debugMode = false;
@@ -60,7 +60,7 @@ public abstract class Unit : MonoBehaviour
     // Variables protegidas de estado interno
     protected float _lastAttackTime = -Mathf.Infinity;
     protected float _deathTime = -Mathf.Infinity;
-    protected bool _isDead = false;
+    public bool _isDead = false;
 
     // TODO: temporalmente aqui, borrar cuando se haga el comportamiento de las unidades.
     [Tooltip("Where the agent should seek to")]
@@ -70,6 +70,7 @@ public abstract class Unit : MonoBehaviour
     public float weight = 1f;
     Seek seek;
 
+    public System.Action<Unit> OnDeath;
     protected virtual void Start()
     {
         this.agent = GetComponent<AgentNPC>();
@@ -84,7 +85,7 @@ public abstract class Unit : MonoBehaviour
 
     void Update()
     {
-        // TODO: esto esta aquï¿½ hasta que se haga el arbol de comportamiento de las unidades, luego se borra
+        // TODO: esto esta aquí hasta que se haga el arbol de comportamiento de las unidades, luego se borra
         autoAttack();
 
         if (_isDead && CanRespawn)
@@ -128,7 +129,7 @@ public abstract class Unit : MonoBehaviour
     }
     public bool isInRange(Unit target)
     {
-        Debug.Log("target nulo? " + (target == null));
+        // Debug.Log("target nulo? " + (target == null));
         return Vector3.Distance(this.getPosition(), target.getPosition()) <= this.range;
     }
 
@@ -185,7 +186,7 @@ public abstract class Unit : MonoBehaviour
         float closestDistance = float.MaxValue;
         TipoTerreno closestTerrain = TipoTerreno.Plain;
 
-        // Buscar la celda mï¿½s cercana
+        // Buscar la celda más cercana
         for (int i = 0; i < grid.columnas; i++)
         {
             for (int j = 0; j < grid.filas; j++)
@@ -196,7 +197,7 @@ public abstract class Unit : MonoBehaviour
                     Vector3 cellCenter = grid.GetCellCenter(i, j);
                     float distance = Vector3.Distance(unitPos, cellCenter);
 
-                    // Si estï¿½ dentro del radio de bï¿½squeda y es la mï¿½s cercana
+                    // Si está dentro del radio de búsqueda y es la más cercana
                     if (distance <= searchRadius && distance < closestDistance)
                     {
                         closestDistance = distance;
@@ -287,17 +288,22 @@ public abstract class Unit : MonoBehaviour
     /// Maneja la muerte de la unidad
     /// </summary>
     private void Die()
-    {
-        gameObject.SetActive(false);
+    {        
         _isDead = true;
         _deathTime = Time.time;
-        // TODO: Esto lo debe hacer el ï¿½rbol de comportamiento
+        // TODO: Esto lo debe hacer el árbol de comportamiento
         FindObjectsByType<GameManager>(FindObjectsSortMode.None)[0].RegisterDeadUnit(this);
+        
+        var a = gameObject.GetComponent<PathFindingTactical>();
+        if (a != null) a.ForceRepath();
+
+        OnDeath?.Invoke(this); // TODO: pasar el objetivo que mató a la unidad
+        gameObject.SetActive(false);
     }
 
 
     /// <summary>
-    /// Puede respawnear si estï¿½ muerto y pasï¿½ el tiempo suficiente
+    /// Puede respawnear si está muerto y pasó el tiempo suficiente
     /// </summary>
     public bool CanRespawn => _isDead && (Time.time - _deathTime >= respawnTime);
 
@@ -308,16 +314,16 @@ public abstract class Unit : MonoBehaviour
     {
         if (!_isDead)
         {
-            Debug.LogWarning($"{this.type} estï¿½ vivo, no puede respawnear.");
+            Debug.LogWarning($"{this.type} está vivo, no puede respawnear.");
             return;
         }
 
         this.health = this.maxHealth;
 
         // Usar siempre el respawn point del StrategicManager si existe
-        if (respawnPoint != Vector3.zero)
-        {
-            this.agent.Position = respawnPoint;
+        if (respawnPoint != null)
+        {   
+            this.agent.Position = new Vector3(respawnPoint.x, agent.Position.y, respawnPoint.z);
         }
         else
         {
@@ -327,22 +333,8 @@ public abstract class Unit : MonoBehaviour
         gameObject.SetActive(true);
         _isDead = false;
 
-
+        
         Debug.Log($"{this.type} ({this.teamID}) respawneado en {this.agent.Position}.");
-    }
-
-    public void DisableUnit()
-    {
-        gameObject.SetActive(false);
-        _isDead = true;
-        _deathTime = Time.time;
-        OnUnitDisabled?.Invoke(this);
-        GameManager.Instance.RegisterDeadUnit(this);
-    }
-
-    public bool IsHealLow()
-    {
-        return health < maxHealth * 0.3f; // menos del 30% de vida
     }
 
 
@@ -364,4 +356,17 @@ public abstract class Unit : MonoBehaviour
         return this.respawnTime;
     }
 
+    // Evento que se dispara cuando la unidad es deshabilitada (muere)
+    // Necesario para los objetivos
+    public System.Action<Unit> OnUnitDisabled;
+
+    void OnDisable()
+    {
+        OnUnitDisabled?.Invoke(this);
+    }
+
+    internal bool IsHealLow()
+    {
+        return ((float)health / maxHealth) < 0.5f;
+    }
 }

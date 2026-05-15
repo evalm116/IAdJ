@@ -1,16 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PathFollowing : Seek
 {
     protected Path _path;
     [SerializeField] protected GameObject _pathParent;
-    [SerializeField] protected float _pathOffset;
+    [SerializeField] protected float _pathOffset = 0.5f;
     protected float _currentParam = 0f;
 
     [SerializeField] public bool loop;
-    protected bool finished;
+    public bool finished;
 
     [Header("Debug PathFollowing")]
     [SerializeField] protected bool _debug;
@@ -62,10 +63,11 @@ public class PathFollowing : Seek
 
     }
 
+    public float distance;
     public override Steering GetSteering(AgentNPC character)
     {
         if (finished && !loop) return new Steering();
-        if (_path.TotalLength == 0 && target != null) return base.GetSteering(character);
+        if ((_path == null || _path.GetNodeCount() == 0) && target != null) return base.GetSteering(character);
 
         _currentParam = _path.getParam(character.Position, _currentParam);
 
@@ -89,7 +91,6 @@ public class PathFollowing : Seek
                 finished = false;
             }
         }
-
         if (!loop && !finished && Vector3.Distance(character.Position, _path.getLastPosition()) <= GetArriveDistance(character))
         {
             finished = true;

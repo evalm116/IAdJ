@@ -16,7 +16,7 @@ public abstract class PathFindingAlgorithm : MonoBehaviour
 
     public Grid grid;
     public float[,] gridHeuristics;
-    protected GridCell _goalCell;    
+    protected GridCell _goalCell;
     public GridCell GoalCell
     {
         get => _goalCell;
@@ -39,8 +39,12 @@ public abstract class PathFindingAlgorithm : MonoBehaviour
     {
         if (grid == null)
         {
-            Debug.LogError("Grid no está asignada en el PathfindingManager.");
-            return;
+            grid = GameManager.Instance.GameGrid;
+            if (grid == null)
+            {
+                Debug.LogError("Grid no asignado ni encontrado para el PathFinding.");
+                return;
+            }
         }
         gridHeuristics = new float[grid.columnas, grid.filas];
         ResetHeuristics();

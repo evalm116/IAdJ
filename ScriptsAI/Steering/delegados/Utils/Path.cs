@@ -152,6 +152,10 @@ public class Path
         return _totalLength;
     }
 
+    public int GetNodeCount() {
+        return _pathNodes.Count;
+    }
+
     // Draw path nodes as spheres and connecting lines as a different color.
     // Note: Unity only invokes OnDrawGizmos on Components (MonoBehaviour/ScriptableObject).
     // Keep this method here so a MonoBehaviour that owns a Path instance can call path.OnDrawGizmos()
