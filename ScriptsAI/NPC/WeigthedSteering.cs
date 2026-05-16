@@ -44,8 +44,7 @@ public class WeigthedSteering
         {
             if (item.behaviour.name == name)
             {
-                behaviours.Remove(item);
-                return true;
+                return behaviours.Remove(item); 
             }
         }
         return false;

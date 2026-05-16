@@ -8,7 +8,6 @@ public class PathFindingTactical : PathFollowing
     [Header("PathFinding Settings")]
     public Transform _objective;
     public Grid gameGrid;
-    public int localAreaRadius = 1;
     private AStarTactical _pathManager;
     private bool _pathSearched = false;
 
@@ -40,6 +39,14 @@ public class PathFindingTactical : PathFollowing
     public bool Finished
     {
         get { return finished; }
+    }
+
+    public AStarTactical PathManager
+    {
+        get { return _pathManager; }
+        set { _pathManager = value;
+            _pathSearched = false;
+        }
     }
 
     private void Awake()

@@ -19,9 +19,9 @@ public class GameManager : MonoBehaviour
     private TacticalAI tacticalAIBlue;
     private TacticalAI tacticalAIRed;
 
-    public InfluenceMap redInfluence;
-    public InfluenceMap blueInfluence;
-    public InfluenceMapManager influenceManager;
+    public InfluenceMap RedInfluence;
+    public InfluenceMap BlueInfluence;
+    public InfluenceMapManager InfluenceManager;
 
     public static GameManager Instance { get; private set; }
     public Grid GameGrid { get; private set; }
@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour
         // Initialize the GameGrid
         GameGrid = GetComponent<Grid>();
 
-        _objectives = GetGroupedComponents<Objective>(objectivesParent);
+            _objectives = GetGroupedComponents<Objective>(objectivesParent);
 
         // Aseguramos que las unidades son del bando que dicen ser
         foreach (Unit u in redUnits)
@@ -68,6 +68,36 @@ public class GameManager : MonoBehaviour
         tacticalAIRed.Construct();
         tacticalAIRed.CurrentStrategy = TacticalAI.Strategy.Offensive;
         tacticalAIRed.currentAttackState = TacticalAI.AttackState.Gather;
+
+        SetUpInfluenceMaps();
+    }
+
+    private void SetUpInfluenceMaps()
+    {
+        var influences = gameObject.GetComponents<InfluenceMap>();
+        foreach (InfluenceMap f in influences) {
+            if (f.bando == BANDO.Blue) {
+                BlueInfluence = f;
+            } else if (f.bando == BANDO.Red)
+            {
+                RedInfluence = f;
+            }
+        }
+
+        if (BlueInfluence == null || RedInfluence == null) {
+            Debug.LogError("Mapas de influencia no configurados correctamente en GameManager");
+            return;
+        }
+
+        var manager = gameObject.GetComponent<InfluenceMapManager>();
+        if (manager == null) {
+            Debug.LogError("Manager de mapas de influencia no configurado correctamente en GameManager");
+            return;
+        }
+        manager.mapRed = RedInfluence;
+        manager.mapBlue = BlueInfluence;
+
+        InfluenceManager = manager;
     }
 
     public List<List<T>> GetGroupedComponents<T>(GameObject parent) where T : Component
@@ -111,14 +141,7 @@ public class GameManager : MonoBehaviour
         {
             if (unit.CanRespawn)
             {
-                if (unit.teamID == BANDO.Blue)
-                {
-                    unit.Respawn(Objectives[0][0].transform.position);
-                }
-                else if (unit.teamID == BANDO.Red)
-                {
-                    unit.Respawn(Objectives.Last()[0].transform.position);
-                }
+                unit.Respawn(MyBase(unit.teamID));                
             }
         }
     }
@@ -142,6 +165,16 @@ public class GameManager : MonoBehaviour
         {
             return blueUnits;
         }
+        return null;
+    }
+
+    public List<Unit> GetEnemyUnits(BANDO teamID)
+    {
+        if (teamID == BANDO.Red)
+            return GetUnits(BANDO.Blue);
+        else if (teamID == BANDO.Blue)
+            return GetUnits(BANDO.Red);
+
         return null;
     }
 
@@ -178,4 +211,30 @@ public class GameManager : MonoBehaviour
         return a.CurrentStrategy;
     }
 
+    public Vector3 MyBase (BANDO teamID)
+    {
+        if (teamID == BANDO.Blue)
+        {
+            return Objectives[0][0].transform.position;
+        }
+        else if (teamID == BANDO.Red)
+        {
+            return Objectives.Last()[0].transform.position;
+        }
+        return Vector3.zero;
+    }
+
+    internal List<float> GetInfluenceArea(List<GridCell> influenceArea)
+    {
+        var influences = new List<float>();
+        var dominanceMap = InfluenceManager.DominanceMap;
+        foreach (GridCell cell in influenceArea)
+        {
+            if (cell == null) continue;
+            var value = dominanceMap[cell.gridPosition.x, cell.gridPosition.y];
+
+            influences.Add(value);
+        }
+        return influences;
+    }
 }

@@ -29,7 +29,7 @@ namespace BBUnity.Conditions
                 targetPoint = val.Value;
                 return true;
             }
-                targetPoint = unit.getPosition();
+                targetPoint = unit.GetPosition();
             return false;
         }
     }

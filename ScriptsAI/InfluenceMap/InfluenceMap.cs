@@ -12,7 +12,7 @@ public class InfluenceMap : MonoBehaviour
     public int influenceRadius = 4;
     public BANDO bando;
 
-    [Range(0, 100)]
+    [Range(0, max: 100)]
     public int decayPerSecond = 20;
 
     [Header("Visualización")]
@@ -63,7 +63,7 @@ public class InfluenceMap : MonoBehaviour
             if (unit.teamID != bando) continue;
             if (!unit.gameObject.activeSelf) continue;
 
-            GridCell npcCell = grid.GetCellAt(unit.getPosition());
+            GridCell npcCell = grid.GetCellAt(unit.GetPosition());
             if (npcCell == null) continue;
 
             int cx = npcCell.gridPosition.x;

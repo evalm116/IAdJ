@@ -58,7 +58,7 @@ public abstract class Unit : MonoBehaviour
     // Variables protegidas de estado interno
     protected float _lastAttackTime = -Mathf.Infinity;
     protected float _deathTime = -Mathf.Infinity;
-    public bool _isDead = false;
+    public bool IsDead = false;
 
     // TODO: temporalmente aqui, borrar cuando se haga el comportamiento de las unidades.
     [Tooltip("Where the agent should seek to")]
@@ -86,7 +86,7 @@ public abstract class Unit : MonoBehaviour
         // TODO: esto esta aquí hasta que se haga el arbol de comportamiento de las unidades, luego se borra
         autoAttack();
 
-        if (_isDead && CanRespawn)
+        if (IsDead && CanRespawn)
         {
             Respawn(Vector3.zero);
         }
@@ -100,7 +100,7 @@ public abstract class Unit : MonoBehaviour
         return type;
     }
 
-    public Vector3 getPosition()
+    public Vector3 GetPosition()
     {
         if (agent == null)
         {
@@ -128,7 +128,7 @@ public abstract class Unit : MonoBehaviour
     public bool isInRange(Unit target)
     {
         // Debug.Log("target nulo? " + (target == null));
-        return Vector3.Distance(this.getPosition(), target.getPosition()) <= this.range;
+        return Vector3.Distance(this.GetPosition(), target.GetPosition()) <= this.range;
     }
 
     // Aplica los valores desde una entrada de stats obtenidad de la base de datos
@@ -179,7 +179,7 @@ public abstract class Unit : MonoBehaviour
             return TipoTerreno.Plain;
         }
 
-        Vector3 unitPos = getPosition();
+        Vector3 unitPos = GetPosition();
         float searchRadius = 5f;
         float closestDistance = float.MaxValue;
         TipoTerreno closestTerrain = TipoTerreno.Plain;
@@ -233,7 +233,7 @@ public abstract class Unit : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        if (_isDead) return; // No recibe da o si muerto
+        if (IsDead) return; // No recibe da o si muerto
         GameObject DamageTextInstance = Instantiate(damageTextPrefab, this.transform);
         //DamageTextInstance.transform.localPosition = new Vector3(0, 2.5f, 0); // Ajusta la posici n del texto de da o sobre la 
         if (damage == -1)
@@ -265,7 +265,7 @@ public abstract class Unit : MonoBehaviour
 
     public void GetHeal(int healing)
     {
-        if (_isDead) return; // No recibe healing si  muerto
+        if (IsDead) return; // No recibe healing si  muerto
 
         GameObject HealingTextInstance = Instantiate(damageTextPrefab, this.transform);
         HealingTextInstance.transform.GetChild(0).GetComponent<TextMeshPro>().text = healing.ToString();
@@ -287,7 +287,7 @@ public abstract class Unit : MonoBehaviour
     /// </summary>
     private void Die()
     {        
-        _isDead = true;
+        IsDead = true;
         _deathTime = Time.time;
         // TODO: Esto lo debe hacer el árbol de comportamiento
         FindObjectsByType<GameManager>(FindObjectsSortMode.None)[0].RegisterDeadUnit(this);
@@ -303,14 +303,14 @@ public abstract class Unit : MonoBehaviour
     /// <summary>
     /// Puede respawnear si está muerto y pasó el tiempo suficiente
     /// </summary>
-    public bool CanRespawn => _isDead && (Time.time - _deathTime >= respawnTime);
+    public bool CanRespawn => IsDead && (Time.time - _deathTime >= respawnTime);
 
     /// <summary>
     /// Respawnea la unidad en su punto de respawn asignado
     /// </summary>
     public void Respawn(Vector3 respawnPoint)
     {
-        if (!_isDead)
+        if (!IsDead)
         {
             Debug.LogWarning($"{this.type} está vivo, no puede respawnear.");
             return;
@@ -329,7 +329,7 @@ public abstract class Unit : MonoBehaviour
         }
 
         gameObject.SetActive(true);
-        _isDead = false;
+        IsDead = false;
 
         
         Debug.Log($"{this.type} ({this.teamID}) respawneado en {this.agent.Position}.");
@@ -365,6 +365,6 @@ public abstract class Unit : MonoBehaviour
 
     internal bool IsHealLow()
     {
-        return ((float)health / maxHealth) < 0.5f;
+        return ((float)health / (float)maxHealth) < 0.5f;
     }
 }

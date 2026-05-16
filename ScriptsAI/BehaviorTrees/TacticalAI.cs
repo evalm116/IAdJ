@@ -565,9 +565,9 @@ public class TacticalAI : MonoBehaviour
 
         Vector3 GetClosestFiendlyObjective()
         {
-            Unit u = attackGroup.Select(pair => pair.Item1).Where(u => !u._isDead).First();
+            Unit u = attackGroup.Select(pair => pair.Item1).Where(u => !u.IsDead).FirstOrDefault();
             if (u != null)
-                return defendObjectives.OrderBy(obj => Vector3.Distance(obj.transform.position, u.getPosition())).First().transform.position;
+                return defendObjectives.OrderBy(obj => Vector3.Distance(obj.transform.position, u.GetPosition())).First().transform.position;
             
             if (defendObjectives == null || defendObjectives.Count == 0)
             {

@@ -9,9 +9,9 @@ namespace BBUnity.Actions
     /// <summary>
     /// It is an action to obtain a random position of an area.
     /// </summary>
-    [Action("IADJ/GoToPoint")]
+    [Action("IADJ/GoToTacticalPoint")]
     [Help("Uses pathFinding to go to a specified point")]
-    public class GoToPoint : GOAction
+    public class GoToTacticalPoint : GOAction
     {
 
         private PathFindingTactical pathFollowing;

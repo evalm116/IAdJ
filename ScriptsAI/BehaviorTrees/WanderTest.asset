@@ -35,10 +35,8 @@ MonoBehaviour:
     />\r\n      <outputParams />\r\n      <localParams />\r\n    </PrioritySelectorNode>\r\n   
     <ConditionEvalNode id=\"13\" policy=\"WAIT_UNTIL_FALSE_AND_FAIL\" name=\"AlwaysTrue\">\r\n     
     <inputParams />\r\n      <outputParams />\r\n      <localParams />\r\n    </ConditionEvalNode>\r\n   
-    <ActionNode id=\"8\" action=\"IADJ/GoToPoint\">\r\n      <inputParams>\r\n       
-    <inputValues>\r\n          <entry name=\"Target Point\" type=\"UnityEngine.Vector3\"
-    isBlackboard=\"True\" blackboard=\"a\" />\r\n        </inputValues>\r\n     
-    </inputParams>\r\n      <outputParams />\r\n      <localParams />\r\n    </ActionNode>\r\n   
+    <ActionNode id=\"8\" action=\"IADJ/GoToTacticalPoint\">\r\n      <inputParams
+    />\r\n      <outputParams />\r\n      <localParams />\r\n    </ActionNode>\r\n   
     <ConditionEvalNode id=\"15\" policy=\"WAIT_UNTIL_TRUE_AND_COMPLETE\" name=\"AlwaysTrue\">\r\n     
     <inputParams />\r\n      <outputParams />\r\n      <localParams />\r\n    </ConditionEvalNode>\r\n   
     <ActionNode id=\"14\" action=\"PrintMessage\">\r\n      <inputParams />\r\n     
@@ -55,38 +53,34 @@ MonoBehaviour:
     <ConditionEvalNode id=\"13\" />\r\n          <RepeatDecorator id=\"9\" />\r\n         
     <ActionNode id=\"14\" />\r\n          <ConditionEvalNode id=\"15\" />\r\n       
     </nodes>\r\n      </_nodes>\r\n    </BehaviorTree>\r\n    <RepeatDecorator id=\"9\">\r\n     
-    <_data>\r\n        <data breakpoint=\"0\" selected=\"False\" position=\"420.1284
-    347.7024\" name=\"Repeat\" description=\"Repeats the execution of its child node\"
+    <_data>\r\n        <data breakpoint=\"0\" selected=\"False\" position=\"451.7949
+    36.03568\" name=\"Repeat\" description=\"Repeats the execution of its child node\"
     cardinality=\"1\" hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n         
     <RepeatDecorator id=\"9\" />\r\n        </data>\r\n      </_data>\r\n    </RepeatDecorator>\r\n   
     <PrioritySelectorNode id=\"11\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
-    selected=\"False\" position=\"349.362 480.0594\" name=\"Priority Selector\" description=\"\"
+    selected=\"False\" position=\"381.0285 168.3927\" name=\"Priority Selector\"
+    description=\"\" cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree
+    id=\"0\" />\r\n          <PrioritySelectorNode id=\"11\" />\r\n          <RepeatDecorator
+    id=\"9\" />\r\n        </data>\r\n      </_data>\r\n    </PrioritySelectorNode>\r\n   
+    <ConditionEvalNode id=\"13\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"381.2729 667.3494\" name=\"AlwaysTrue\" description=\"Eval\"
     cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree id=\"0\" />\r\n         
-    <PrioritySelectorNode id=\"11\" />\r\n          <RepeatDecorator id=\"9\" />\r\n       
-    </data>\r\n      </_data>\r\n    </PrioritySelectorNode>\r\n    <ConditionEvalNode
-    id=\"13\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
-    position=\"349.6064 979.0159\" name=\"AlwaysTrue\" description=\"Eval\" cardinality=\"1\"
-    hasParent=\"True\">\r\n          <BehaviorTree id=\"0\" />\r\n          <ConditionEvalNode
-    id=\"13\" />\r\n          <PrioritySelectorNode id=\"11\" />\r\n        </data>\r\n     
-    </_data>\r\n    </ConditionEvalNode>\r\n    <ActionNode id=\"8\">\r\n      <_data>\r\n       
-    <data breakpoint=\"0\" selected=\"True\" position=\"158.7902 723.6708\" name=\"IADJ/GoToPoint\"
-    description=\"Uses pathFinding to go to a specified point\" cardinality=\"0\"
-    hasParent=\"False\">\r\n          <BehaviorTree id=\"8\" />\r\n        </data>\r\n     
+    <ConditionEvalNode id=\"13\" />\r\n          <PrioritySelectorNode id=\"11\"
+    />\r\n        </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n    <ActionNode
+    id=\"8\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
+    position=\"190.457 412.0042\" name=\"IADJ/GoToTacticalPoint\" description=\"Uses
+    pathFinding to go to a specified point\" cardinality=\"0\" hasParent=\"False\">\r\n         
+    <BehaviorTree id=\"0\" />\r\n          <ActionNode id=\"8\" />\r\n        </data>\r\n     
     </_data>\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"15\">\r\n      <_data>\r\n       
-    <data breakpoint=\"0\" selected=\"False\" position=\"873.6487 875.2834\" name=\"AlwaysTrue\"
+    <data breakpoint=\"0\" selected=\"False\" position=\"820.3152 531.9499\" name=\"AlwaysTrue\"
     description=\"Eval\" cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree
     id=\"0\" />\r\n          <ConditionEvalNode id=\"15\" />\r\n          <PrioritySelectorNode
     id=\"11\" />\r\n        </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n   
     <ActionNode id=\"14\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
-    position=\"625.0775 745.4871\" name=\"PrintMessage\" description=\"Prints a message
+    position=\"571.744 402.1541\" name=\"PrintMessage\" description=\"Prints a message
     (param Text) on the standard output.\" cardinality=\"0\" hasParent=\"False\">\r\n         
     <BehaviorTree id=\"0\" />\r\n          <ActionNode id=\"14\" />\r\n        </data>\r\n     
-    </_data>\r\n    </ActionNode>\r\n  </editorInfo>\r\n  <runtimeInfo>\r\n    <BehaviorTree
-    id=\"8\" nextId=\"1\">\r\n      <inputParams />\r\n      <outputParams />\r\n     
-    <localParams />\r\n    </BehaviorTree>\r\n  </runtimeInfo>\r\n  <editorInfo>\r\n   
-    <BehaviorTree id=\"8\" _removeIfClosed=\"False\">\r\n      <_rootList />\r\n     
-    <_nodes>\r\n        <nodes />\r\n      </_nodes>\r\n    </BehaviorTree>\r\n 
-    </editorInfo>\r\n</BehaviorBricks>"
+    </_data>\r\n    </ActionNode>\r\n  </editorInfo>\r\n</BehaviorBricks>"
   zoom: 0.6
   subslist: []
   _guid: 134faab4abb72984287bed9cd25a278d

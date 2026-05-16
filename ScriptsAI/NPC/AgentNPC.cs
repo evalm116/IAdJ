@@ -153,7 +153,7 @@ public class AgentNPC : Agent
         return false;
     }
 
-    public bool emptySteering()
+    public bool EmptySteeringList()
     {
         if (listSteerings.Count == 0) return false;
 

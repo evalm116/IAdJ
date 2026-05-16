@@ -68,8 +68,6 @@ public class LRTAStar : PathFindingAlgorithm
     /// <returns></returns>
     public List<GridCell> GetEspacioBusqueda(GridCell currentCell, int tamanoEspacio)
     {
-        
-
         Queue<(GridCell, int)> nodosBusquedas = new Queue<(GridCell, int)>();
         List<GridCell> espacioBusqueda = new List<GridCell>();
 

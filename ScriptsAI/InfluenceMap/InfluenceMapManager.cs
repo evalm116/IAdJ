@@ -24,8 +24,8 @@ public class InfluenceMapManager : MonoBehaviour
     public RawImage minimapTension;
 
     // Mapas derivados accesibles desde otros scripts
-    public int[,] dominanceMap { get; private set; }
-    public int[,] tensionMap { get; private set; }
+    public int[,] DominanceMap { get; private set; }
+    public int[,] TensionMap { get; private set; }
 
     private Texture2D texDominance;
     private Texture2D texTension;
@@ -58,8 +58,8 @@ public class InfluenceMapManager : MonoBehaviour
         int cols = grid.columnas;
         int rows = grid.filas;
 
-        dominanceMap = new int[cols, rows];
-        tensionMap = new int[cols, rows];
+        DominanceMap = new int[cols, rows];
+        TensionMap = new int[cols, rows];
 
         for (int x = 0; x < cols; x++)
         {
@@ -70,11 +70,11 @@ public class InfluenceMapManager : MonoBehaviour
 
                 // Dominancia: [-1 .. 1]
                 // -1 = dominio total Blue, +1 = dominio total Red
-                dominanceMap[x, z] = r - b;
+                DominanceMap[x, z] = r - b;
 
                 // Tensión: [0 .. 1]
                 // máxima tensión donde ambos bandos se solapan
-                tensionMap[x, z] = r + b;
+                TensionMap[x, z] = r + b;
             }
         }
     }
@@ -100,7 +100,7 @@ public class InfluenceMapManager : MonoBehaviour
         {
             for (int z = 0; z < grid.filas; z++)
             {
-                float d = dominanceMap[x, z] / 100f; // [-1..1]
+                float d = DominanceMap[x, z] / 100f; // [-1..1]
                 Color c;
 
                 if (d > 0)
@@ -145,7 +145,7 @@ public class InfluenceMapManager : MonoBehaviour
         {
             for (int z = 0; z < grid.filas; z++)
             {
-                float t = tensionMap[x, z] / 200f; // [0..1]
+                float t = TensionMap[x, z] / 200f; // [0..1]
                 Color c = gradientTension.Evaluate(t);
                 c.a = t > 0f ? 1f : 0f;
 
@@ -165,7 +165,7 @@ public class InfluenceMapManager : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (!showValuesInEditor) return;
-        if (dominanceMap == null || tensionMap == null) return;
+        if (DominanceMap == null || TensionMap == null) return;
 
 #if UNITY_EDITOR
         GUIStyle style = new GUIStyle();
@@ -176,8 +176,8 @@ public class InfluenceMapManager : MonoBehaviour
         {
             for (int z = 0; z < grid.filas; z++)
             {
-                int d = dominanceMap[x, z];
-                int t = tensionMap[x, z];
+                int d = DominanceMap[x, z];
+                int t = TensionMap[x, z];
 
                 if (Mathf.Abs(d) < 1 && t < 1) continue;
 
@@ -203,7 +203,7 @@ public class InfluenceMapManager : MonoBehaviour
     {
         Vector2Int pos = grid.GetGridPosition(worldPosition);
         if (!grid.PosicionValida(pos)) return 0f;
-        return dominanceMap[pos.x, pos.y];
+        return DominanceMap[pos.x, pos.y];
     }
 
     /// <summary>
@@ -213,6 +213,6 @@ public class InfluenceMapManager : MonoBehaviour
     {
         Vector2Int pos = grid.GetGridPosition(worldPosition);
         if (!grid.PosicionValida(pos)) return 0f;
-        return tensionMap[pos.x, pos.y] / 200f;
+        return TensionMap[pos.x, pos.y] / 200f;
     }
 }
