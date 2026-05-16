@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34a7c8ca992f915438a96c2077353778, type: 3}
   m_Name: OfensivoMelee
   m_EditorClassIdentifier: 
-  brickName: Assets/IADJ/ScriptsAI/BehaviorTrees/BehaviorBricks/OfensivoMelee.asset
+  brickName: Assets/IADJ/ScriptsAI/BehaviorTrees/OfensivoMelee.asset
   xml: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BehaviorBricks xmlns:ref=\"urn:padaone\"
     version=\"1.0\">\r\n  <BehaviorTree id=\"0\" />\r\n  <runtimeInfo>\r\n    <BehaviorTree
     id=\"0\" guid=\"930fcafba6377c542b6a31e3784be62d\" nextId=\"15\">\r\n      <root>\r\n       
@@ -45,23 +45,24 @@ MonoBehaviour:
     </elem>\r\n      </children>\r\n      <inputParams />\r\n      <outputParams
     />\r\n      <localParams />\r\n    </PrioritySelectorNode>\r\n    <ActionNode
     id=\"4\" action=\"Basic/WaitForSeconds\">\r\n      <inputParams>\r\n        <inputValues>\r\n         
-    <entry name=\"seconds\" type=\"System.Single\" isBlackboard=\"False\" value=\"2\"
+    <entry name=\"seconds\" type=\"System.Single\" isBlackboard=\"False\" value=\"1\"
     />\r\n        </inputValues>\r\n      </inputParams>\r\n      <outputParams />\r\n     
-    <localParams />\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"6\" policy=\"ATOMIC_CHECK\"
+    <localParams />\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"6\" policy=\"WAIT_UNTIL_TRUE_AND_COMPLETE\"
     name=\"IADJ/IsUnitHealthLow\">\r\n      <inputParams />\r\n      <outputParams
     />\r\n      <localParams />\r\n    </ConditionEvalNode>\r\n    <ActionNode id=\"5\"
     action=\"IADJ/GoToSafeZone\">\r\n      <inputParams />\r\n      <outputParams
     />\r\n      <localParams />\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"8\"
-    policy=\"ATOMIC_CHECK\" name=\"IADJ/OportunityEnemy\">\r\n      <inputParams>\r\n       
-    <inputValues>\r\n          <entry name=\"Oportunity Distance\" type=\"System.Single\"
-    isBlackboard=\"False\" value=\"0\" />\r\n        </inputValues>\r\n      </inputParams>\r\n     
-    <outputParams>\r\n        <outputValues>\r\n          <entry name=\"Oportunity
+    policy=\"WAIT_UNTIL_TRUE_AND_COMPLETE\" name=\"IADJ/OportunityEnemy\">\r\n     
+    <inputParams>\r\n        <inputValues>\r\n          <entry name=\"Oportunity
+    Distance\" type=\"System.Single\" isBlackboard=\"False\" value=\"0\" />\r\n       
+    </inputValues>\r\n      </inputParams>\r\n      <outputParams>\r\n        <outputValues>\r\n         
+    <entry name=\"Oportunity Enemy\" type=\"Unit\" isBlackboard=\"True\" blackboard=\"OportunityEnemy\"
+    />\r\n        </outputValues>\r\n      </outputParams>\r\n      <localParams
+    />\r\n    </ConditionEvalNode>\r\n    <ActionNode id=\"7\" action=\"IADJ/PursueEnemyMelee\">\r\n     
+    <inputParams>\r\n        <inputValues>\r\n          <entry name=\"Oportunity
     Enemy\" type=\"Unit\" isBlackboard=\"True\" blackboard=\"OportunityEnemy\" />\r\n       
-    </outputValues>\r\n      </outputParams>\r\n      <localParams />\r\n    </ConditionEvalNode>\r\n   
-    <ActionNode id=\"7\" action=\"IADJ/PursueEnemyMelee\">\r\n      <inputParams>\r\n       
-    <inputValues>\r\n          <entry name=\"Oportunity Enemy\" type=\"Unit\" isBlackboard=\"False\"
-    />\r\n        </inputValues>\r\n      </inputParams>\r\n      <outputParams />\r\n     
-    <localParams />\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"10\" policy=\"ATOMIC_CHECK\"
+    </inputValues>\r\n      </inputParams>\r\n      <outputParams />\r\n      <localParams
+    />\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"10\" policy=\"WAIT_UNTIL_TRUE_AND_COMPLETE\"
     name=\"IADJ/PreasureInfluence\">\r\n      <inputParams>\r\n        <inputValues>\r\n         
     <entry name=\"Influence Preasure Max\" type=\"System.Single\" isBlackboard=\"False\"
     value=\"75\" />\r\n          <entry name=\"Influence Check Radius\" type=\"System.Int32\"
@@ -69,7 +70,7 @@ MonoBehaviour:
     <outputParams />\r\n      <localParams />\r\n    </ConditionEvalNode>\r\n   
     <ActionNode id=\"9\" action=\"IADJ/GoToSafeZone\">\r\n      <inputParams />\r\n     
     <outputParams />\r\n      <localParams />\r\n    </ActionNode>\r\n    <ConditionEvalNode
-    id=\"12\" policy=\"ATOMIC_CHECK\" name=\"IADJ/IsInMeleeChaseRange\">\r\n     
+    id=\"12\" policy=\"WAIT_UNTIL_FALSE_AND_FAIL\" name=\"IADJ/IsInMeleeChaseRange\">\r\n     
     <inputParams>\r\n        <inputValues>\r\n          <entry name=\"Chase Distance\"
     type=\"System.Single\" isBlackboard=\"False\" value=\"10\" />\r\n        </inputValues>\r\n     
     </inputParams>\r\n      <outputParams>\r\n        <outputValues>\r\n         
@@ -79,7 +80,7 @@ MonoBehaviour:
     <inputParams>\r\n        <inputValues>\r\n          <entry name=\"Oportunity
     Enemy\" type=\"Unit\" isBlackboard=\"True\" blackboard=\"OportunityEnemy\" />\r\n       
     </inputValues>\r\n      </inputParams>\r\n      <outputParams />\r\n      <localParams
-    />\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"14\" policy=\"ATOMIC_CHECK\"
+    />\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"14\" policy=\"WAIT_UNTIL_TRUE_AND_COMPLETE\"
     name=\"AlwaysTrue\">\r\n      <inputParams />\r\n      <outputParams />\r\n     
     <localParams />\r\n    </ConditionEvalNode>\r\n    <ActionNode id=\"13\" action=\"IADJ/GoToTacticalPoint\">\r\n     
     <inputParams>\r\n        <inputValues>\r\n          <entry name=\"Target Point\"
@@ -109,71 +110,73 @@ MonoBehaviour:
     id=\"12\" />\r\n          <ActionNode id=\"13\" />\r\n          <ConditionEvalNode
     id=\"14\" />\r\n        </nodes>\r\n      </_nodes>\r\n    </BehaviorTree>\r\n   
     <RepeatDecorator id=\"1\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
-    selected=\"False\" position=\"603 -36\" name=\"Repeat\" description=\"Repeats
+    selected=\"False\" position=\"368.3729 358.9\" name=\"Repeat\" description=\"Repeats
     the execution of its child node\" cardinality=\"1\" hasParent=\"False\">\r\n         
     <BehaviorTree id=\"0\" />\r\n          <RepeatDecorator id=\"1\" />\r\n       
     </data>\r\n      </_data>\r\n    </RepeatDecorator>\r\n    <SequenceNode id=\"2\">\r\n     
-    <_data>\r\n        <data breakpoint=\"0\" selected=\"False\" position=\"597 158\"
-    name=\"Sequence\" description=\"Executes all its children in sequence until all
-    of them are successful\" cardinality=\"-1\" hasParent=\"True\">\r\n         
+    <_data>\r\n        <data breakpoint=\"0\" selected=\"False\" position=\"362.3729
+    552.9\" name=\"Sequence\" description=\"Executes all its children in sequence
+    until all of them are successful\" cardinality=\"-1\" hasParent=\"True\">\r\n         
     <BehaviorTree id=\"0\" />\r\n          <SequenceNode id=\"2\" />\r\n         
     <RepeatDecorator id=\"1\" />\r\n        </data>\r\n      </_data>\r\n    </SequenceNode>\r\n   
     <PrioritySelectorNode id=\"3\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
-    selected=\"False\" position=\"398 396\" name=\"Priority Selector\" description=\"\"
+    selected=\"False\" position=\"163.3728 790.9\" name=\"Priority Selector\" description=\"\"
     cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree id=\"0\" />\r\n         
     <PrioritySelectorNode id=\"3\" />\r\n          <SequenceNode id=\"2\" />\r\n       
     </data>\r\n      </_data>\r\n    </PrioritySelectorNode>\r\n    <ActionNode id=\"4\">\r\n     
-    <_data>\r\n        <data breakpoint=\"0\" selected=\"False\" position=\"802 414\"
-    name=\"Basic/WaitForSeconds\" description=\"Action that success after a period
-    of time.\" cardinality=\"0\" hasParent=\"True\">\r\n          <BehaviorTree id=\"0\"
-    />\r\n          <ActionNode id=\"4\" />\r\n          <SequenceNode id=\"2\" />\r\n       
-    </data>\r\n      </_data>\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"6\">\r\n     
-    <_data>\r\n        <data breakpoint=\"0\" selected=\"False\" position=\"-93 580\"
-    name=\"IADJ/IsUnitHealthLow\" description=\"Eval\" cardinality=\"1\" hasParent=\"True\">\r\n         
-    <BehaviorTree id=\"0\" />\r\n          <ConditionEvalNode id=\"6\" />\r\n         
-    <PrioritySelectorNode id=\"3\" />\r\n        </data>\r\n      </_data>\r\n   
-    </ConditionEvalNode>\r\n    <ActionNode id=\"5\">\r\n      <_data>\r\n       
-    <data breakpoint=\"0\" selected=\"False\" position=\"-93 580\" name=\"IADJ/GoToSafeZone\"
-    description=\"Uses pathFinding to go to a specified point\" cardinality=\"0\"
-    hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n          <ActionNode
-    id=\"5\" />\r\n        </data>\r\n      </_data>\r\n    </ActionNode>\r\n   
-    <ConditionEvalNode id=\"8\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
-    selected=\"False\" position=\"143 585\" name=\"IADJ/OportunityEnemy\" description=\"Eval\"
+    <_data>\r\n        <data breakpoint=\"0\" selected=\"False\" position=\"567.373
+    808.9\" name=\"Basic/WaitForSeconds\" description=\"Action that success after
+    a period of time.\" cardinality=\"0\" hasParent=\"True\">\r\n          <BehaviorTree
+    id=\"0\" />\r\n          <ActionNode id=\"4\" />\r\n          <SequenceNode id=\"2\"
+    />\r\n        </data>\r\n      </_data>\r\n    </ActionNode>\r\n    <ConditionEvalNode
+    id=\"6\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
+    position=\"-327.6273 974.9\" name=\"IADJ/IsUnitHealthLow\" description=\"Eval\"
     cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree id=\"0\" />\r\n         
-    <ConditionEvalNode id=\"8\" />\r\n          <PrioritySelectorNode id=\"3\" />\r\n       
-    </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n    <ActionNode id=\"7\">\r\n     
-    <_data>\r\n        <data breakpoint=\"0\" selected=\"False\" position=\"143 585\"
-    name=\"IADJ/PursueEnemyMelee\" description=\"Uses pathFinding to go to pursue
-    enemy as if the unit is a melee unit\" cardinality=\"0\" hasParent=\"False\">\r\n         
-    <BehaviorTree id=\"0\" />\r\n          <ActionNode id=\"7\" />\r\n        </data>\r\n     
-    </_data>\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"10\">\r\n      <_data>\r\n       
-    <data breakpoint=\"0\" selected=\"False\" position=\"379 580\" name=\"IADJ/PreasureInfluence\"
+    <ConditionEvalNode id=\"6\" />\r\n          <PrioritySelectorNode id=\"3\" />\r\n       
+    </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n    <ActionNode id=\"5\">\r\n     
+    <_data>\r\n        <data breakpoint=\"0\" selected=\"False\" position=\"-327.6273
+    974.9\" name=\"IADJ/GoToSafeZone\" description=\"Uses pathFinding to go to a
+    specified point\" cardinality=\"0\" hasParent=\"False\">\r\n          <BehaviorTree
+    id=\"0\" />\r\n          <ActionNode id=\"5\" />\r\n        </data>\r\n     
+    </_data>\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"8\">\r\n      <_data>\r\n       
+    <data breakpoint=\"0\" selected=\"False\" position=\"-91.62729 979.9\" name=\"IADJ/OportunityEnemy\"
+    description=\"Eval\" cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree
+    id=\"0\" />\r\n          <ConditionEvalNode id=\"8\" />\r\n          <PrioritySelectorNode
+    id=\"3\" />\r\n        </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n   
+    <ActionNode id=\"7\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
+    position=\"-91.62729 979.9\" name=\"IADJ/PursueEnemyMelee\" description=\"Uses
+    pathFinding to go to pursue enemy as if the unit is a melee unit\" cardinality=\"0\"
+    hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n          <ActionNode
+    id=\"7\" />\r\n        </data>\r\n      </_data>\r\n    </ActionNode>\r\n   
+    <ConditionEvalNode id=\"10\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"144.3728 974.9\" name=\"IADJ/PreasureInfluence\"
     description=\"Eval\" cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree
     id=\"0\" />\r\n          <ConditionEvalNode id=\"10\" />\r\n          <PrioritySelectorNode
     id=\"3\" />\r\n        </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n   
     <ActionNode id=\"9\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
-    position=\"379 580\" name=\"IADJ/GoToSafeZone\" description=\"Uses pathFinding
+    position=\"144.3728 974.9\" name=\"IADJ/GoToSafeZone\" description=\"Uses pathFinding
     to go to a specified point\" cardinality=\"0\" hasParent=\"False\">\r\n         
     <BehaviorTree id=\"0\" />\r\n          <ActionNode id=\"9\" />\r\n        </data>\r\n     
     </_data>\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"12\">\r\n      <_data>\r\n       
-    <data breakpoint=\"0\" selected=\"False\" position=\"609 585\" name=\"IADJ/IsInMeleeChaseRange\"
-    description=\"Eval\" cardinality=\"1\" hasParent=\"False\">\r\n          <BehaviorTree
-    id=\"0\" />\r\n          <ConditionEvalNode id=\"12\" />\r\n        </data>\r\n     
-    </_data>\r\n    </ConditionEvalNode>\r\n    <ActionNode id=\"11\">\r\n      <_data>\r\n       
-    <data breakpoint=\"0\" selected=\"False\" position=\"609 585\" name=\"IADJ/PursueEnemyMelee\"
-    description=\"Uses pathFinding to go to pursue enemy as if the unit is a melee
-    unit\" cardinality=\"0\" hasParent=\"False\">\r\n          <BehaviorTree id=\"0\"
-    />\r\n          <ActionNode id=\"11\" />\r\n        </data>\r\n      </_data>\r\n   
-    </ActionNode>\r\n    <ConditionEvalNode id=\"14\">\r\n      <_data>\r\n       
-    <data breakpoint=\"0\" selected=\"False\" position=\"873 571\" name=\"AlwaysTrue\"
+    <data breakpoint=\"0\" selected=\"False\" position=\"374.3729 979.9\" name=\"IADJ/IsInMeleeChaseRange\"
     description=\"Eval\" cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree
-    id=\"0\" />\r\n          <ConditionEvalNode id=\"14\" />\r\n          <PrioritySelectorNode
+    id=\"0\" />\r\n          <ConditionEvalNode id=\"12\" />\r\n          <PrioritySelectorNode
     id=\"3\" />\r\n        </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n   
-    <ActionNode id=\"13\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
-    position=\"873 571\" name=\"IADJ/GoToTacticalPoint\" description=\"Uses pathFinding
-    to go to a specified point\" cardinality=\"0\" hasParent=\"False\">\r\n         
-    <BehaviorTree id=\"0\" />\r\n          <ActionNode id=\"13\" />\r\n        </data>\r\n     
+    <ActionNode id=\"11\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
+    position=\"374.3729 979.9\" name=\"IADJ/PursueEnemyMelee\" description=\"Uses
+    pathFinding to go to pursue enemy as if the unit is a melee unit\" cardinality=\"0\"
+    hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n          <ActionNode
+    id=\"11\" />\r\n        </data>\r\n      </_data>\r\n    </ActionNode>\r\n   
+    <ConditionEvalNode id=\"14\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"638.373 965.9\" name=\"AlwaysTrue\" description=\"Eval\"
+    cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree id=\"0\" />\r\n         
+    <ConditionEvalNode id=\"14\" />\r\n          <PrioritySelectorNode id=\"3\" />\r\n       
+    </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n    <ActionNode id=\"13\">\r\n     
+    <_data>\r\n        <data breakpoint=\"0\" selected=\"False\" position=\"638.373
+    965.9\" name=\"IADJ/GoToTacticalPoint\" description=\"Uses pathFinding to go
+    to a specified point\" cardinality=\"0\" hasParent=\"False\">\r\n          <BehaviorTree
+    id=\"0\" />\r\n          <ActionNode id=\"13\" />\r\n        </data>\r\n     
     </_data>\r\n    </ActionNode>\r\n  </editorInfo>\r\n</BehaviorBricks>"
-  zoom: 1
+  zoom: 0.5
   subslist: []
   _guid: 930fcafba6377c542b6a31e3784be62d

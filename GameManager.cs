@@ -60,13 +60,13 @@ public class GameManager : MonoBehaviour
         tacticalAIBlue = gameObject.AddComponent<TacticalAI>();
         tacticalAIBlue.teamID = BANDO.Blue;
         tacticalAIBlue.Construct();
-        tacticalAIBlue.CurrentStrategy = TacticalAI.Strategy.Defensive;
+        tacticalAIBlue.CurrentStrategy = TacticalAI.Strategy.Offensive;
         tacticalAIBlue.currentAttackState = TacticalAI.AttackState.Gather;
 
         tacticalAIRed = gameObject.AddComponent<TacticalAI>();
         tacticalAIRed.teamID = BANDO.Red;
         tacticalAIRed.Construct();
-        tacticalAIRed.CurrentStrategy = TacticalAI.Strategy.Offensive;
+        tacticalAIRed.CurrentStrategy = TacticalAI.Strategy.Defensive;
         tacticalAIRed.currentAttackState = TacticalAI.AttackState.Gather;
 
         SetUpInfluenceMaps();
@@ -236,5 +236,15 @@ public class GameManager : MonoBehaviour
             influences.Add(value);
         }
         return influences;
+    }
+
+    public Objective GetNextPatrolObjective(Unit u, Objective obj = null) { 
+
+        if (u.teamID == BANDO.Blue)
+            return tacticalAIBlue.GetNextPatrolObjective(u, obj);
+        else if (u.teamID == BANDO.Red)
+            return tacticalAIRed.GetNextPatrolObjective(u, obj);
+
+        return null;
     }
 }

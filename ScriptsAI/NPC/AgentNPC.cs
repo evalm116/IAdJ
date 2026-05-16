@@ -126,12 +126,12 @@ public class AgentNPC : Agent
 
     public bool addSteering(SteeringBehaviour steer)
     {
-        string name = steer.name;
+        string name = steer.NameSteering;
 
         if (listSteerings.Contains(steer)) return false;
         foreach (SteeringBehaviour behavior in listSteerings)
         {
-            if (behavior.name == name)
+            if (behavior.NameSteering == name)
             {
                 return false;
             }
@@ -145,7 +145,7 @@ public class AgentNPC : Agent
     {
         foreach (SteeringBehaviour behavior in listSteerings)
         {
-            if (behavior.name == name)
+            if (behavior.NameSteering == name)
             {
                 return listSteerings.Remove(behavior);
             }

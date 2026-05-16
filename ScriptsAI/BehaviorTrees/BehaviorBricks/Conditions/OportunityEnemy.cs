@@ -25,7 +25,8 @@ namespace BBUnity.Conditions
             Unit unit = gameObject.GetComponent<Unit>();
             if (unit == null) return false;
 
-            (float distance, Unit bestCandidate) = GameManager.Instance.GetEnemyUnits(unit.teamID).Where(enemy => enemy.IsHealLow())
+            (float distance, Unit bestCandidate) = GameManager.Instance.GetEnemyUnits(unit.teamID)                
+                .Where(enemy => enemy.IsHealLow() && !enemy.IsDead)
                 .Select(enemy => (Vector3.Distance(enemy.GetPosition(), unit.GetPosition()), enemy))
                 .OrderBy( pair => pair.Item1).FirstOrDefault();
 

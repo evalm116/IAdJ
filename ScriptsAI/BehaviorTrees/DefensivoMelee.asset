@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34a7c8ca992f915438a96c2077353778, type: 3}
   m_Name: DefensivoMelee
   m_EditorClassIdentifier: 
-  brickName: Assets/IADJ/ScriptsAI/BehaviorTrees/BehaviorBricks/DefensivoMelee.asset
+  brickName: Assets/IADJ/ScriptsAI/BehaviorTrees/DefensivoMelee.asset
   xml: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BehaviorBricks xmlns:ref=\"urn:padaone\"
     version=\"1.0\">\r\n  <BehaviorTree id=\"0\" />\r\n  <runtimeInfo>\r\n    <BehaviorTree
     id=\"0\" guid=\"98646f6e0bbb7974aa87d621c3195bb3\" nextId=\"13\">\r\n      <root>\r\n       
@@ -46,7 +46,7 @@ MonoBehaviour:
     <inputValues>\r\n          <entry name=\"seconds\" type=\"System.Single\" isBlackboard=\"False\"
     value=\"1\" />\r\n        </inputValues>\r\n      </inputParams>\r\n      <outputParams
     />\r\n      <localParams />\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"6\"
-    policy=\"WAIT_UNTIL_FALSE_AND_FAIL\" name=\"IADJ/IsUnitHealthLow\">\r\n     
+    policy=\"WAIT_UNTIL_TRUE_AND_COMPLETE\" name=\"IADJ/IsUnitHealthLow\">\r\n     
     <inputParams />\r\n      <outputParams />\r\n      <localParams />\r\n    </ConditionEvalNode>\r\n   
     <ActionNode id=\"5\" action=\"IADJ/GoToSafeZone\">\r\n      <inputParams />\r\n     
     <outputParams />\r\n      <localParams />\r\n    </ActionNode>\r\n    <ConditionEvalNode
@@ -60,7 +60,7 @@ MonoBehaviour:
     <inputParams>\r\n        <inputValues>\r\n          <entry name=\"Oportunity
     Enemy\" type=\"Unit\" isBlackboard=\"True\" blackboard=\"OportunityEnemy\" />\r\n       
     </inputValues>\r\n      </inputParams>\r\n      <outputParams />\r\n      <localParams
-    />\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"12\" policy=\"WAIT_UNTIL_TRUE_AND_COMPLETE\"
+    />\r\n    </ActionNode>\r\n    <ConditionEvalNode id=\"12\" policy=\"WAIT_UNTIL_FALSE_AND_FAIL\"
     name=\"IADJ/AttackCloseEnemyDefensive\">\r\n      <inputParams>\r\n        <inputValues>\r\n         
     <entry name=\"Chase Distance\" type=\"System.Single\" isBlackboard=\"False\"
     value=\"3\" />\r\n          <entry name=\"Influence Check Radius\" type=\"System.Int32\"

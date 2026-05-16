@@ -834,4 +834,18 @@ public class TacticalAI : MonoBehaviour
         return depth;
     }
 
+    public Objective GetNextPatrolObjective(Unit u, Objective obj = null) {
+        if (obj == null || !defendObjectives.Contains(obj))
+        {
+            return defendObjectives[0];
+        }
+        // Actualizamos si la unidad se encuentra dentro del punto
+        else if (obj.GetUnitsInObjective().Contains(u))
+        {
+            int index = (defendObjectives.IndexOf(obj) + 1) % defendObjectives.Count;
+            return defendObjectives[index];
+        }
+
+        return obj;
+    }
 }

@@ -34,8 +34,8 @@ namespace BBUnity.Conditions
             var influenceArea = MyUtils.GetEspacioBusqueda(currentCell, influenceCheckRadius);
             var influences = GameManager.Instance.GetInfluenceArea(influenceArea);
             var a = influences.Average();
-            if ((unit.teamID == BANDO.Red && influences.Average() > -1 * preasureMax) ||
-                (unit.teamID == BANDO.Blue && influences.Average() < preasureMax))
+            if ((unit.teamID == BANDO.Red && influences.Average() < -1 * preasureMax) ||
+                (unit.teamID == BANDO.Blue && influences.Average() > preasureMax))
             {
                 return true;
             }

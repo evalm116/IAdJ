@@ -10,51 +10,52 @@ namespace BBUnity.Actions
     /// <summary>
     /// It is an action to obtain a random position of an area.
     /// </summary>
-    [Action("IADJ/GoToTacticalPoint")]
-    [Help("Uses pathFinding to go to a specified point")]
-    public class GoToTacticalPoint : GOAction
+    [Action("IADJ/Patrol")]
+    [Help("Patrulla por puntos defensivos de su IA Tactica")]
+    public class Patrol : GOAction
     {
 
         private PathFindingTactical pathFollowing;
 
-        private Unit unit;
-        private bool isDead;
-
-        [InParam("Target Point")]
-        [Help("The point that the unit will move to")]
-        private Vector3 targetPoint;
+        [InParam("PrevObjective")]
+        [Help("Objetivo previo")]
+        private Objective PrevObjective;
         // Start is called before the first frame update
 
         bool failedOnStart = false;
         public override void OnStart()
         {
-            isDead = false;
+            Unit unit;
             GameManager gameManager = GameManager.Instance;
             unit = gameObject.GetComponent<Unit>();
-            pathFollowing = gameObject.GetComponent<PathFindingTactical>();                       
-            
-            Vector3? val = gameManager.GetUnitTarget(unit);
-            if (!val.HasValue)
+            pathFollowing = gameObject.GetComponent<PathFindingTactical>();
+
+            if (pathFollowing == null)
+            {
+                pathFollowing = gameObject.AddComponent<PathFindingTactical>();
+            }
+
+            if (pathFollowing.PathManager == null)
+            {
+                pathFollowing.PathManager = gameObject.AddComponent<AStarTactical>();
+            }
+
+            Objective obj = GameManager.Instance.GetNextPatrolObjective(unit, PrevObjective);
+            if (obj == null)
             {
                 failedOnStart = true;
                 return;
             }
 
-            pathFollowing.Objective.position = val.Value;
-            pathFollowing.SetUpObjective();
+            if (obj == PrevObjective)
+                return;
 
-            unit.OnUnitDisabled += HandleUnitDeath;
+            pathFollowing.ObjectivePosition = obj.transform.position;
+            PrevObjective = obj;
 
             unit.agent.EmptySteeringList();
             unit.agent.addSteering(pathFollowing);
-        }
-
-  
-
-        // Se pone esta función por un error que me dio
-        public void OnEnable()
-        {
-            OnStart();
+            failedOnStart = false;
         }
 
         // Update is called once per frame
@@ -67,9 +68,5 @@ namespace BBUnity.Actions
             return TaskStatus.COMPLETED;
         }
 
-        public void HandleUnitDeath(Unit unit)
-        {
-            isDead = true;
-        }
     }
 }

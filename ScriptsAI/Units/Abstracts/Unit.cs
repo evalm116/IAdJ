@@ -365,6 +365,11 @@ public abstract class Unit : MonoBehaviour
 
     internal bool IsHealLow()
     {
-        return ((float)health / (float)maxHealth) < 0.5f;
+        return health < maxHealth / 3;
+    }
+
+    internal bool IsFullHealth()
+    {
+        return health >= maxHealth;
     }
 }
