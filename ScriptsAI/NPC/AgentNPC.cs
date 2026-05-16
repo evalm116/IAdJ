@@ -123,4 +123,41 @@ public class AgentNPC : Agent
         Speed = 0f;
         Rotation = 0f;
     }
+
+    public bool addSteering(SteeringBehaviour steer)
+    {
+        string name = steer.name;
+
+        if (listSteerings.Contains(steer)) return false;
+        foreach (SteeringBehaviour behavior in listSteerings)
+        {
+            if (behavior.name == name)
+            {
+                return false;
+            }
+        }
+        
+        listSteerings.Add(steer);
+        return true;
+    }
+
+    public bool removeSteering(string name)
+    {
+        foreach (SteeringBehaviour behavior in listSteerings)
+        {
+            if (behavior.name == name)
+            {
+                return listSteerings.Remove(behavior);
+            }
+        }
+        return false;
+    }
+
+    public bool emptySteering()
+    {
+        if (listSteerings.Count == 0) return false;
+
+        listSteerings = new List<SteeringBehaviour>();
+        return true;
+    }
 }
