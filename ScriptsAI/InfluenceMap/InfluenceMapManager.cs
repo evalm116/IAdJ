@@ -161,7 +161,7 @@ public class InfluenceMapManager : MonoBehaviour
         if (minimapTension != null) minimapTension.texture = texTension;
     }
 
-    // ── Gizmos con número encima de cada celda ──────────────────────────
+    // ── Gizmos con número encima de cada celda    
     private void OnDrawGizmos()
     {
         if (!showValuesInEditor) return;
