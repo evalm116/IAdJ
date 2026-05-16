@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34a7c8ca992f915438a96c2077353778, type: 3}
+  m_Name: MeleeMasterTree
+  m_EditorClassIdentifier: 
+  brickName: Assets/IADJ/ScriptsAI/BehaviorTrees/MeleeMasterTree.asset
+  xml: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BehaviorBricks xmlns:ref=\"urn:padaone\"
+    version=\"1.0\">\r\n  <BehaviorTree id=\"0\" />\r\n  <runtimeInfo>\r\n    <BehaviorTree
+    id=\"0\" guid=\"ee0ee078918a1934fb5267db4958ec7a\" nextId=\"9\">\r\n      <root>\r\n       
+    <RepeatDecorator id=\"1\" />\r\n      </root>\r\n      <inputParams />\r\n     
+    <outputParams />\r\n      <localParams />\r\n    </BehaviorTree>\r\n    <RepeatDecorator
+    id=\"1\" loops=\"-1\" policy=\"ContinueWhenChildFails\">\r\n      <child>\r\n       
+    <PrioritySelectorNode id=\"2\" />\r\n      </child>\r\n      <inputParams />\r\n     
+    <outputParams />\r\n      <localParams />\r\n    </RepeatDecorator>\r\n    <PrioritySelectorNode
+    id=\"2\">\r\n      <children>\r\n        <elem>\r\n          <GuardAndNode>\r\n           
+    <guard>\r\n              <ConditionEvalNode id=\"4\" />\r\n            </guard>\r\n           
+    <child>\r\n              <SubbehaviorNode id=\"3\" />\r\n            </child>\r\n         
+    </GuardAndNode>\r\n        </elem>\r\n        <elem>\r\n          <GuardAndNode>\r\n           
+    <guard>\r\n              <ConditionEvalNode id=\"7\" />\r\n            </guard>\r\n           
+    <child>\r\n              <SubbehaviorNode id=\"5\" />\r\n            </child>\r\n         
+    </GuardAndNode>\r\n        </elem>\r\n        <elem>\r\n          <GuardAndNode>\r\n           
+    <guard>\r\n              <ConditionEvalNode id=\"8\" />\r\n            </guard>\r\n           
+    <child>\r\n              <SubbehaviorNode id=\"6\" />\r\n            </child>\r\n         
+    </GuardAndNode>\r\n        </elem>\r\n      </children>\r\n      <inputParams
+    />\r\n      <outputParams />\r\n      <localParams />\r\n    </PrioritySelectorNode>\r\n   
+    <ConditionEvalNode id=\"4\" policy=\"ATOMIC_CHECK\" name=\"IADJ/IsOffensive\">\r\n     
+    <inputParams />\r\n      <outputParams />\r\n      <localParams />\r\n    </ConditionEvalNode>\r\n   
+    <SubbehaviorNode id=\"3\">\r\n      <_guid>930fcafba6377c542b6a31e3784be62d</_guid>\r\n     
+    <inputParams />\r\n      <outputParams>\r\n        <outputValues>\r\n         
+    <entry name=\"OportunityEnemy\" type=\"Unit\" isBlackboard=\"True\" />\r\n       
+    </outputValues>\r\n      </outputParams>\r\n      <localParams />\r\n    </SubbehaviorNode>\r\n   
+    <ConditionEvalNode id=\"7\" policy=\"ATOMIC_CHECK\" name=\"IADJ/IsDefensive\">\r\n     
+    <inputParams />\r\n      <outputParams />\r\n      <localParams />\r\n    </ConditionEvalNode>\r\n   
+    <SubbehaviorNode id=\"5\">\r\n      <_guid>98646f6e0bbb7974aa87d621c3195bb3</_guid>\r\n     
+    <inputParams />\r\n      <outputParams />\r\n      <localParams />\r\n    </SubbehaviorNode>\r\n   
+    <ConditionEvalNode id=\"8\" policy=\"ATOMIC_CHECK\" name=\"IADJ/IsTotalWar\">\r\n     
+    <inputParams />\r\n      <outputParams />\r\n      <localParams />\r\n    </ConditionEvalNode>\r\n   
+    <SubbehaviorNode id=\"6\">\r\n      <_guid>3fb96d74c83eacc4e958f5d7c4a682b3</_guid>\r\n     
+    <inputParams />\r\n      <outputParams>\r\n        <outputValues>\r\n         
+    <entry name=\"ChaseEnemy\" type=\"Unit\" isBlackboard=\"True\" />\r\n       
+    </outputValues>\r\n      </outputParams>\r\n      <localParams />\r\n    </SubbehaviorNode>\r\n 
+    </runtimeInfo>\r\n  <editorInfo>\r\n    <BehaviorTree id=\"0\" _name=\"MeleeMasterTree\"
+    _description=\"\" _removeIfClosed=\"False\">\r\n      <_rootList>\r\n       
+    <elem>\r\n          <RepeatDecorator id=\"1\" />\r\n        </elem>\r\n       
+    <elem>\r\n          <PrioritySelectorNode id=\"2\" />\r\n        </elem>\r\n       
+    <elem>\r\n          <SubbehaviorNode id=\"3\" />\r\n        </elem>\r\n       
+    <elem>\r\n          <ConditionEvalNode id=\"4\" />\r\n        </elem>\r\n       
+    <elem>\r\n          <SubbehaviorNode id=\"5\" />\r\n        </elem>\r\n       
+    <elem>\r\n          <SubbehaviorNode id=\"6\" />\r\n        </elem>\r\n       
+    <elem>\r\n          <ConditionEvalNode id=\"7\" />\r\n        </elem>\r\n       
+    <elem>\r\n          <ConditionEvalNode id=\"8\" />\r\n        </elem>\r\n     
+    </_rootList>\r\n      <_nodes>\r\n        <nodes>\r\n          <RepeatDecorator
+    id=\"1\" />\r\n          <PrioritySelectorNode id=\"2\" />\r\n          <SubbehaviorNode
+    id=\"3\" />\r\n          <ConditionEvalNode id=\"4\" />\r\n          <SubbehaviorNode
+    id=\"5\" />\r\n          <SubbehaviorNode id=\"6\" />\r\n          <ConditionEvalNode
+    id=\"7\" />\r\n          <ConditionEvalNode id=\"8\" />\r\n        </nodes>\r\n     
+    </_nodes>\r\n    </BehaviorTree>\r\n    <RepeatDecorator id=\"1\">\r\n      <_data>\r\n       
+    <data breakpoint=\"0\" selected=\"False\" position=\"194.7931 246.0277\" name=\"Repeat\"
+    description=\"Repeats the execution of its child node\" cardinality=\"1\" hasParent=\"False\">\r\n         
+    <BehaviorTree id=\"0\" />\r\n          <RepeatDecorator id=\"1\" />\r\n       
+    </data>\r\n      </_data>\r\n    </RepeatDecorator>\r\n    <PrioritySelectorNode
+    id=\"2\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
+    position=\"78.79302 368.9177\" name=\"Priority Selector\" description=\"\" cardinality=\"1\"
+    hasParent=\"True\">\r\n          <BehaviorTree id=\"0\" />\r\n          <PrioritySelectorNode
+    id=\"2\" />\r\n          <RepeatDecorator id=\"1\" />\r\n        </data>\r\n     
+    </_data>\r\n    </PrioritySelectorNode>\r\n    <ConditionEvalNode id=\"4\">\r\n     
+    <_data>\r\n        <data breakpoint=\"0\" selected=\"False\" position=\"-20.11636
+    656.9533\" name=\"IADJ/IsOffensive\" description=\"Eval\" cardinality=\"1\" hasParent=\"False\">\r\n         
+    <BehaviorTree id=\"0\" />\r\n          <ConditionEvalNode id=\"4\" />\r\n       
+    </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n    <SubbehaviorNode
+    id=\"3\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
+    position=\"-32.70894 596.5833\" name=\"OfensivoMelee\" description=\"\" cardinality=\"-1\"
+    hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n          <SubbehaviorNode
+    id=\"3\" />\r\n        </data>\r\n      </_data>\r\n    </SubbehaviorNode>\r\n   
+    <ConditionEvalNode id=\"7\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"189.8836 652.8793\" name=\"IADJ/IsDefensive\" description=\"Eval\"
+    cardinality=\"1\" hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n         
+    <ConditionEvalNode id=\"7\" />\r\n        </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n   
+    <SubbehaviorNode id=\"5\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"167.291 593.2498\" name=\"DefensivoMelee\" description=\"\"
+    cardinality=\"-1\" hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n         
+    <SubbehaviorNode id=\"5\" />\r\n        </data>\r\n      </_data>\r\n    </SubbehaviorNode>\r\n   
+    <ConditionEvalNode id=\"8\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"421.1027 655.2249\" name=\"IADJ/IsTotalWar\" description=\"Eval\"
+    cardinality=\"1\" hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n         
+    <ConditionEvalNode id=\"8\" />\r\n        </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n   
+    <SubbehaviorNode id=\"6\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"373.8187 595.472\" name=\"TotalWarMelee\" description=\"\"
+    cardinality=\"-1\" hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n         
+    <SubbehaviorNode id=\"6\" />\r\n        </data>\r\n      </_data>\r\n    </SubbehaviorNode>\r\n 
+    </editorInfo>\r\n</BehaviorBricks>"
+  zoom: 0.8
+  subslist:
+  - {fileID: 11400000, guid: 930fcafba6377c542b6a31e3784be62d, type: 2}
+  - {fileID: 11400000, guid: 98646f6e0bbb7974aa87d621c3195bb3, type: 2}
+  - {fileID: 11400000, guid: 3fb96d74c83eacc4e958f5d7c4a682b3, type: 2}
+  _guid: ee0ee078918a1934fb5267db4958ec7a
