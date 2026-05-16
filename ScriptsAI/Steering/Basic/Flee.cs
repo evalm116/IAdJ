@@ -16,11 +16,25 @@ public class Flee : SteeringBehaviour
 
         if (target == null) return steer;
 
-        // Huir: Vector DESDE el objetivo HACIA mí
         Vector3 direction = agent.Position - target.Position;
+        float distance = direction.magnitude;
 
-        direction.Normalize();
-        steer.linear = direction * agent.MaxAcceleration;
+        if (distance < agent.InteriorRadius)
+        {
+            agent.Velocity = Vector3.zero;
+            return steer;
+        }
+
+        float targetSpeed;
+        if (distance <= agent.InteriorRadius)
+            targetSpeed = agent.MaxSpeed;
+        else if (distance <= agent.ArrivalRadius)
+            targetSpeed = agent.MaxSpeed * (distance / agent.InteriorRadius);
+        else
+            targetSpeed = 0;
+
+            Vector3 desiredVelocity = direction.normalized * targetSpeed;
+        steer.linear = desiredVelocity - agent.Velocity;
         steer.angular = 0;
 
         return steer;
