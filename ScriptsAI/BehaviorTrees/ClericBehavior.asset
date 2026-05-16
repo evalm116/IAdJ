@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34a7c8ca992f915438a96c2077353778, type: 3}
   m_Name: ClericBehavior
   m_EditorClassIdentifier: 
-  brickName: Assets/ClericBehavior.asset
+  brickName: Assets/IADJ/ScriptsAI/BehaviorTrees/ClericBehavior.asset
   xml: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BehaviorBricks xmlns:ref=\"urn:padaone\"
     version=\"1.0\">\r\n  <BehaviorTree id=\"0\" />\r\n  <runtimeInfo>\r\n    <BehaviorTree
     id=\"0\" guid=\"4b9ac80a835c52246a4534465102588a\" nextId=\"9\">\r\n      <root>\r\n       
