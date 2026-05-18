@@ -87,7 +87,6 @@ public class AgentNPC : Agent
 
     public virtual void LateUpdate()
     {
-        ApplyProfileWeights();
 
         Steering kinematicFinal = new Steering();
 

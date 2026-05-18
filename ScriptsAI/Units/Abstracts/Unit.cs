@@ -20,7 +20,7 @@ public abstract class Unit : MonoBehaviour
     public GameObject healingTextPrefab;
 
     [Tooltip("Tiempo en segundos antes de poder respawnear")]
-    public float respawnTime = 3f;
+    public float respawnTime = 30f;
 
     public enum Type
     {

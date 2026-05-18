@@ -17,7 +17,7 @@ namespace BBUnity.Actions
 
         private PathFindingTactical pathFollowing;
 
-        [InParam("PrevObjective")]
+        [LocalParam("PrevObjective")]
         [Help("Objetivo previo")]
         private Objective PrevObjective;
         // Start is called before the first frame update

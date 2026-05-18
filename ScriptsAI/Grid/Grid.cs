@@ -139,7 +139,7 @@ public class Grid : MonoBehaviour
         int x = cell.gridPosition.x;
         int z = cell.gridPosition.y; // Ojo: en Vector2Int 'y' representa tu 'z' del mundo
 
-        /*
+        
         // Arriba
         if (z + 1 < filas && gridArray[x, z + 1].isWalkable) neighbors.Add(gridArray[x, z + 1]);
         // Abajo
@@ -147,8 +147,8 @@ public class Grid : MonoBehaviour
         // Derecha
         if (x + 1 < columnas && gridArray[x + 1, z].isWalkable) neighbors.Add(gridArray[x + 1, z]);
         // Izquierda
-        if (x - 1 >= 0 && gridArray[x - 1, z].isWalkable) neighbors.Add(gridArray[x - 1, z]);*/
-
+        if (x - 1 >= 0 && gridArray[x - 1, z].isWalkable) neighbors.Add(gridArray[x - 1, z]);
+        /*
         for (int dx = -1; dx <= 1; dx++)
         {
             for (int dz = -1; dz <= 1; dz++)
@@ -160,12 +160,12 @@ public class Grid : MonoBehaviour
                 int vecinoY = z + dz;
 
                 // COMPROBACIÓN DE LÍMITES
-                if (vecinoX >= 0 && vecinoX < filas && vecinoY >= 0 && vecinoY < columnas)
+                if (vecinoX >= 0 && vecinoX < filas && vecinoY >= 0 && vecinoY < columnas && gridArray[vecinoX, vecinoY].isWalkable)
                 {
                     neighbors.Add(gridArray[vecinoX, vecinoY]);
                 }
             }
-        }
+        }*/
 
 
         return neighbors;

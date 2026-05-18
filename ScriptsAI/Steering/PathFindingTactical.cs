@@ -11,6 +11,8 @@ public class PathFindingTactical : PathFollowing
     private AStarTactical _pathManager;
     private bool _pathSearched = false;
 
+    public bool isUnderManualControl = false;
+
     public Transform Objective
     {
         get { return _objective; }
